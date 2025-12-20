@@ -94,16 +94,12 @@
             <div style="text-align:center; margin-bottom:20px;"><img src="logo.jpg" class="logo-img" onerror="this.style.display='none'"></div>
             <h3 style="text-align:center;">Login</h3>
             <input type="text" id="uName" class="form-input" placeholder="Your Name">
-            
             <div style="display:flex; align-items:center; gap:5px;">
                 <span style="font-weight:bold; color:#555;">+91</span>
                 <input type="tel" id="uPhone" class="form-input" placeholder="Mobile Number" style="margin-bottom:10px;">
             </div>
-            
             <div id="recaptcha-container"></div>
-
             <button id="sendOtpBtn" class="full-btn" onclick="sendRealOTP()">Send SMS OTP</button>
-            
             <div id="otpArea" style="display:none; margin-top:10px;">
                 <input type="number" id="otpIn" class="form-input" placeholder="Enter 6-digit Code">
                 <button class="full-btn" style="background:green;" onclick="verifyRealOTP()">Verify & Login</button>
@@ -266,10 +262,7 @@
             if(!window.recaptchaVerifier) {
                 window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                     'size': 'invisible',
-                    'callback': (response) => {
-                        // reCAPTCHA solved, allow signInWithPhoneNumber.
-                        console.log("Recaptcha solved");
-                    }
+                    'callback': (response) => { console.log("Recaptcha solved"); }
                 });
             }
         }
@@ -284,8 +277,6 @@
             if(phone.length !== 10) { msg.innerText = "Enter valid 10-digit number"; return; }
 
             const phoneNumber = "+91" + phone;
-            
-            // Setup ReCaptcha
             window.setupRecaptcha();
             const appVerifier = window.recaptchaVerifier;
 
@@ -301,8 +292,7 @@
                 }).catch((error) => {
                     console.error(error);
                     document.getElementById('sendOtpBtn').disabled = false;
-                    msg.innerText = "Error sending SMS: " + error.message;
-                    // Reset recaptcha
+                    msg.innerText = "Error: " + error.message;
                     if(window.recaptchaVerifier) window.recaptchaVerifier.clear();
                 });
         }
@@ -323,7 +313,7 @@
                 };
                 localStorage.setItem('jijaUser', JSON.stringify(userData));
                 document.getElementById('loginModal').style.display = 'none';
-                window.location.reload(); // Refresh to clean up state
+                window.location.reload(); 
             }).catch((error) => {
                 msg.innerText = "Invalid Code";
                 console.error(error);
@@ -332,24 +322,35 @@
 
         // --- DATA LOAD ---
         window.loadData = async function() {
+            // Priority: Hardcoded > LocalStorage > Firebase
             try {
                 if(typeof HARDCODED_DATA !== 'undefined' && HARDCODED_DATA !== null) {
-                    // Use Hardcoded if present
                     window.appData = HARDCODED_DATA;
                 } else {
-                    // Else use Firebase
+                    // Try Local Storage First for Speed
+                    const localData = localStorage.getItem('jijaData');
+                    if(localData) window.appData = JSON.parse(localData);
+
+                    // Then Fetch from Firebase to Update
                     const snap = await getDoc(doc(db, "store", "inventory"));
                     if (snap.exists()) {
                         window.appData = snap.data();
+                        // Update local storage so next load is fast
+                        localStorage.setItem('jijaData', JSON.stringify(window.appData));
                     }
                 }
 
                 if(window.appData) {
+                    // Ensure global variables are set for the standard script to use
                     window.products = window.appData.products || [];
                     window.subCategories = window.appData.subCategories || {};
+                    
                     if(Array.isArray(window.subCategories)) {
                         window.subCategories = { cloth: window.subCategories, kids: ["Boys", "Girls"], jewelry: [], toy: [] };
                     }
+                } else {
+                    window.products = [];
+                    window.subCategories = {};
                 }
             } catch (e) {
                 console.error("Error loading data", e);
@@ -363,6 +364,8 @@
         window.updateRemoteStock = async function(updatedData) {
             try {
                 await setDoc(doc(db, "store", "inventory"), updatedData);
+                // Also update local storage immediately
+                localStorage.setItem('jijaData', JSON.stringify(updatedData));
                 console.log("🔥 Stock Updated in Cloud");
                 return true;
             } catch (e) {
@@ -377,10 +380,18 @@
     </script>
 
     <script>
-        // MAIN APP LOGIC (Non-Module)
+        // --- ⚠️ PASTE DATA HERE FROM ADMIN PANEL ---
+        const HARDCODED_DATA = null; 
+        // ------------------------------------------
+
         const ADMIN = "918830903621";
         const SHIPPING_PER_ITEM = 40;
         let cart=[], user=null, curProd=null;
+        
+        // GLOBAL VARIABLES (Window level for shared access)
+        window.products = []; 
+        window.subCategories = {}; 
+        
         let currentMainCat='all', currentSubCat='all';
         let slideIndex=0; let slideInterval;
 
@@ -405,10 +416,10 @@
             } else {
                 document.getElementById('loginModal').style.display='flex';
             }
-            // Data loading handled by module script
+            // Data loading logic is in the module script which runs automatically
         };
 
-        // Note: sendOTP and verifyOTP are now handled by window.sendRealOTP etc. in module script
+        // Note: OTP functions are handled by module script via window methods
         function sendOTP() { window.sendRealOTP(); }
         function verifyOTP() { window.verifyRealOTP(); }
 
@@ -616,9 +627,10 @@
             document.getElementById('loading').style.display = 'flex'; // Show loading
             
             // 1. DEDUCT STOCK FROM CLOUD
-            let updatedData = window.appData; // Current state
+            let updatedData = window.appData; // Current state from cloud
+            if(!updatedData) updatedData = { products: [] }; // Fallback
+
             let totalItems = 0;
-            
             cart.forEach(c => {
                 let dbProd = updatedData.products.find(p => p.id === c.id);
                 if(dbProd) {
