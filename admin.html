@@ -3,73 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jija Admin Pro</title>
+    <title>Jija Admin Pro | Live Inventory</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         :root { --primary: #D81B60; --dark: #1e293b; --light: #f1f5f9; --white: #ffffff; --green: #10b981; --red: #ef4444; }
         body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--light); display: flex; height: 100vh; color: #334155; }
         
+        /* SIDEBAR */
         .sidebar { width: 260px; background: var(--dark); color: white; display: flex; flex-direction: column; padding: 20px; }
         .brand { font-size: 1.5rem; font-weight: 600; color: var(--primary); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
         .nav-item { padding: 12px; color: #94a3b8; display: flex; gap: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; text-decoration: none; margin-bottom: 5px; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
         
+        /* MAIN */
         .main { flex: 1; overflow-y: auto; padding: 30px; }
         .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .card-header { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         
+        /* FORM INPUTS */
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box; }
         .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-danger { background: var(--red); color: white; }
-        
-        .multi-select-box { border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; max-height: 100px; overflow-y: auto; background: #f8fafc; }
-        .ms-option { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 0.9rem; }
-        
-        /* BANNER */
-        .banner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-        .banner-item { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; position: relative; height: 120px; background: #000; }
-        .banner-item img, .banner-item video { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
-        .banner-txt { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; padding: 5px; text-align: center; font-size: 0.8rem; font-weight: bold; }
-        .banner-del { position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+        .btn-outline { border: 1px solid #cbd5e1; background: white; color: #475569; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
 
-        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 999; display: none; align-items: center; justify-content: center; }
+        /* STOCK DISPLAY IN TABLE */
+        .stock-tag { display: inline-block; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin: 2px; border: 1px solid #e2e8f0; background: #f8fafc; }
+        .stock-tag.low { color: var(--red); border-color: #fca5a5; background: #fef2f2; }
+        .stock-tag.ok { color: var(--green); border-color: #86efac; background: #f0fdf4; }
+
+        /* STOCK GRID INPUTS */
+        .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
+        .stk-box { background: #f8fafc; padding: 5px; border: 1px solid #cbd5e1; border-radius: 5px; text-align: center; }
+        .stk-box label { font-size: 0.75rem; display: block; font-weight: 600; margin-bottom: 3px; }
+        .stk-box input { margin: 0; text-align: center; font-weight: 700; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; padding: 12px; background: #f1f5f9; color: #64748b; font-size: 0.85rem; font-weight: 600; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        .thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0; }
+
+        /* LOADER */
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 999; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        /* EDIT MODE STYLE */
+        .editing-mode { border: 2px solid var(--edit); background-color: #fffbeb; }
     </style>
 </head>
 <body>
 
-<div id="loader"><div class="spinner"></div></div>
+<div id="loader"><div class="spinner"></div><div style="margin-top:10px; font-weight:600; color:var(--primary);">Fetching from Cloud...</div></div>
 
 <div class="sidebar">
     <div class="brand"><i class="ri-store-3-line"></i> Jija Admin</div>
-    <a href="#productCard" class="nav-item active"><i class="ri-shirt-line"></i> Products</a>
-    <a href="#categoryCard" class="nav-item"><i class="ri-layout-grid-line"></i> Banners & Ads</a>
-    <a href="#reviewCard" class="nav-item"><i class="ri-star-line"></i> Reviews</a>
+    <a href="#productForm" class="nav-item active"><i class="ri-add-circle-line"></i> Add / Edit Product</a>
+    <a href="#inventoryCard" class="nav-item"><i class="ri-list-check"></i> Inventory List</a>
+    <a href="#categoryCard" class="nav-item"><i class="ri-layout-grid-line"></i> Banners & Cats</a>
 </div>
 
 <div class="main">
     
-    <div class="card" id="categoryCard">
-        <div class="card-header">Category Advertising Banners</div>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start;">
-            <select id="banCat" style="width: 150px;">
-                <option value="">Target Category</option>
-                </select>
-            <select id="banType" style="width: 100px;">
-                <option value="img">Image</option>
-                <option value="vid">Video (MP4)</option>
-            </select>
-            <input id="banMedia" placeholder="Media URL (Image Link or MP4 Link)" style="flex:1;">
-            <button class="btn btn-primary" onclick="addCategoryBanner()">Add Ad</button>
-        </div>
-        <div id="bannerGrid" class="banner-grid"></div>
-    </div>
-
     <div class="card" id="productForm">
-        <div class="card-header"><span id="formTitle">Add Product</span> <button class="btn btn-danger" id="cancelEdit" style="display:none;" onclick="resetForm()">Cancel</button></div>
+        <div class="card-header">
+            <span id="formTitle">Add New Product</span> 
+            <button class="btn btn-danger" id="cancelEdit" style="display:none;" onclick="resetForm()">Cancel Edit</button>
+        </div>
+        
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div>
                 <input id="pName" placeholder="Product Name">
@@ -85,7 +89,7 @@
             <div>
                 <input id="pPrice" type="number" placeholder="Selling Price">
                 <input id="pMrp" type="number" placeholder="MRP">
-                <input id="pBadge" placeholder="Badge URL (Optional)">
+                <input id="pBadge" placeholder="Badge URL (e.g. Sale icon)">
             </div>
         </div>
         
@@ -94,33 +98,56 @@
             <input id="pImg2" placeholder="Image 2 URL">
             <input id="pImg3" placeholder="Image 3 URL">
         </div>
-        <input id="pVideo" placeholder="YouTube Video URL (Optional)">
-        
-        <textarea id="pDesc" rows="3" placeholder="Description..."></textarea>
+        <input id="pVideo" placeholder="YouTube Video URL">
+        <textarea id="pDesc" rows="2" placeholder="Description..."></textarea>
         
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
             <input type="checkbox" id="pBanner" style="width:auto; margin:0;">
-            <label for="pBanner" style="margin:0;">Show in Home Slider?</label>
+            <label for="pBanner" style="margin:0;">Promote in Home Slider?</label>
         </div>
 
-        <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px dashed #cbd5e1;">
-            <label style="font-weight:600;">Stock Inventory:</label>
-            <div id="stockGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap:10px; margin-top:10px;"></div>
+        <div style="background:#f0fdf4; padding:15px; border-radius:8px; border:1px dashed var(--green);">
+            <label style="font-weight:600; color:#15803d;"><i class="ri-stack-line"></i> Manage Inventory Stock</label>
+            <div id="stockGrid" class="stock-grid"></div>
         </div>
 
-        <button class="btn btn-primary" onclick="saveProduct()" style="margin-top:20px; width:100%;">Save Product</button>
+        <button class="btn btn-primary" onclick="saveProduct()" style="margin-top:20px; width:100%;" id="saveBtn">Save Product</button>
     </div>
 
-    <div class="card" id="reviewCard">
-        <div class="card-header">Customer Reviews</div>
-        <div id="reviewList" style="max-height: 300px; overflow-y: auto;"></div>
+    <div class="card" id="inventoryCard">
+        <div class="card-header">Current Inventory</div>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="60">Img</th>
+                        <th>Product Details</th>
+                        <th>Price</th>
+                        <th>Stock Breakdown</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" id="categoryCard">
+        <div class="card-header">Category Ads</div>
+        <div style="display: flex; gap: 10px;">
+            <select id="banCat" style="width: 150px;"><option value="">Category</option></select>
+            <select id="banType" style="width: 100px;"><option value="img">Image</option><option value="vid">Video</option></select>
+            <input id="banMedia" placeholder="Media URL" style="flex:1;">
+            <button class="btn btn-primary" onclick="addCategoryBanner()">Add Ad</button>
+        </div>
+        <div id="bannerGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:10px; margin-top:10px;"></div>
     </div>
 
 </div>
 
 <script>
     const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
-    let appData = { products: [], reviews: [], catBanners: [], subCategories: { cloth:["Saree","Kurti"], kids:["Boys"], footwear:["Shoes"], jewelry:["Set"], toy:["Cars"] } };
+    let appData = { products: [], catBanners: [], subCategories: { cloth:["Saree","Kurti"], kids:["Boys"], footwear:["Shoes"], jewelry:["Set"], toy:["Cars"] } };
     let editId = null;
 
     const SIZES = {
@@ -137,76 +164,61 @@
         try {
             const r = await fetch(DB_URL);
             const d = await r.json();
+            
             if(d) {
+                // Cloud data found - Use it
                 appData = d;
-                if(!appData.reviews) appData.reviews = [];
+                if(!appData.products) appData.products = [];
                 if(!appData.catBanners) appData.catBanners = [];
+            } else {
+                // Cloud is empty? Try local storage backup
+                const local = localStorage.getItem('jijaData');
+                if(local) {
+                    appData = JSON.parse(local);
+                    console.log("Recovered from Local Storage. Syncing to Cloud...");
+                    saveData(); // Push local data to cloud immediately
+                }
             }
             refreshUI();
-        } catch(e) { alert("Error loading data"); }
+        } catch(e) { 
+            console.error(e);
+            alert("Error loading data. Check internet connection."); 
+        }
         document.getElementById('loader').style.display = 'none';
     }
 
     async function saveData() {
         document.getElementById('loader').style.display = 'flex';
-        await fetch(DB_URL, { method: "PUT", body: JSON.stringify(appData) });
+        try {
+            await fetch(DB_URL, { method: "PUT", body: JSON.stringify(appData) });
+            // Backup locally as well
+            localStorage.setItem('jijaData', JSON.stringify(appData));
+        } catch(e) {
+            alert("Save failed! Check internet.");
+        }
         document.getElementById('loader').style.display = 'none';
-        alert("Saved!");
-        refreshUI();
+        refreshUI(); // Ensure table reflects new data immediately
     }
 
     function refreshUI() {
         renderSubSelect();
+        renderTable();
         renderBanners();
-        renderReviews();
     }
 
-    // --- BANNERS (VIDEO & IMG) ---
-    function addCategoryBanner() {
-        const sub = document.getElementById('banCat').value;
-        const media = document.getElementById('banMedia').value;
-        const type = document.getElementById('banType').value;
-        if(sub && media) {
-            appData.catBanners.push({ sub, media, type });
-            saveData();
-        }
-    }
-
-    function renderBanners() {
-        const div = document.getElementById('bannerGrid');
-        div.innerHTML = appData.catBanners.map((b, i) => {
-            const mediaHtml = b.type === 'vid' 
-                ? `<video src="${b.media}" muted loop autoplay style="width:100%; height:100%; object-fit:cover;"></video>`
-                : `<img src="${b.media}" style="width:100%; height:100%; object-fit:cover;">`;
-            
-            return `<div class="banner-item">
-                ${mediaHtml}
-                <div class="banner-txt">${b.sub}</div>
-                <div class="banner-del" onclick="delBanner(${i})">&times;</div>
-            </div>`;
-        }).join('');
-    }
-
-    function delBanner(i) {
-        if(confirm("Delete banner?")) {
-            appData.catBanners.splice(i, 1);
-            saveData();
-        }
-    }
-
-    // --- PRODUCTS ---
+    // --- PRODUCT LOGIC ---
     function renderSubSelect() {
         const cat = document.getElementById('pCat').value;
         const subs = appData.subCategories[cat] || [];
-        const box = document.getElementById('subCatBox');
-        box.innerHTML = subs.map(s => 
-            `<div class="ms-option"><input type="checkbox" value="${s}" name="subcat"> ${s}</div>`
-        ).join('');
         
-        const banSel = document.getElementById('banCat');
+        // Multi-select Logic
+        let html = subs.map(s => `<div style="margin:2px 0;"><input type="checkbox" value="${s}" name="subcat"> ${s}</div>`).join('');
+        document.getElementById('subCatBox').innerHTML = html || "<small>No sub-categories</small>";
+
+        // Banner Dropdown
         let allSubs = [];
         for(let k in appData.subCategories) allSubs = [...allSubs, ...appData.subCategories[k]];
-        banSel.innerHTML = '<option value="">Select Sub-Category</option>' + allSubs.map(s => `<option value="${s}">${s}</option>`).join('');
+        document.getElementById('banCat').innerHTML = '<option value="">Target Cat</option>' + allSubs.map(s => `<option value="${s}">${s}</option>`).join('');
 
         renderStockInputs(cat);
     }
@@ -215,7 +227,7 @@
         const div = document.getElementById('stockGrid');
         const sizes = SIZES[cat] || ["General"];
         div.innerHTML = sizes.map(s => 
-            `<div><label style="font-size:0.8rem">${s}</label><input type="number" class="stk-in" data-s="${s}" value="0"></div>`
+            `<div class="stk-box"><label>${s}</label><input type="number" class="stk-in" data-s="${s}" value="0"></div>`
         ).join('');
     }
 
@@ -231,7 +243,7 @@
             id: editId || Date.now(),
             name,
             cat: document.getElementById('pCat').value,
-            subCats: subs, 
+            subCats: subs,
             price: document.getElementById('pPrice').value,
             mrp: document.getElementById('pMrp').value,
             badge: document.getElementById('pBadge').value,
@@ -247,46 +259,137 @@
         if(editId) {
             const idx = appData.products.findIndex(p => p.id === editId);
             appData.products[idx] = prod;
+            alert("Product Updated!");
         } else {
             appData.products.push(prod);
+            alert("Product Added!");
         }
         
         saveData();
         resetForm();
     }
 
+    function startEdit(id) {
+        const p = appData.products.find(x => x.id === id);
+        if(!p) return;
+        
+        editId = id;
+        document.getElementById('productForm').scrollIntoView({behavior:'smooth'});
+        document.getElementById('productForm').classList.add('editing-mode'); // Visual cue
+        
+        document.getElementById('formTitle').innerText = "Edit Product: " + p.name;
+        document.getElementById('saveBtn').innerText = "Update Product";
+        document.getElementById('cancelEdit').style.display = 'block';
+
+        document.getElementById('pName').value = p.name;
+        document.getElementById('pCat').value = p.cat;
+        document.getElementById('pPrice').value = p.price;
+        document.getElementById('pMrp').value = p.mrp || "";
+        document.getElementById('pBadge').value = p.badge || "";
+        document.getElementById('pImg').value = p.img;
+        document.getElementById('pImg2').value = p.img2 || "";
+        document.getElementById('pImg3').value = p.img3 || "";
+        document.getElementById('pVideo').value = p.video || "";
+        document.getElementById('pDesc').value = p.desc || "";
+        document.getElementById('pBanner').checked = p.isBanner;
+
+        renderSubSelect(); // Refresh checkboxes
+        
+        // Fill checkboxes
+        if(p.subCats) {
+            document.querySelectorAll('input[name="subcat"]').forEach(cb => {
+                if(p.subCats.includes(cb.value)) cb.checked = true;
+            });
+        }
+
+        // Fill stock
+        setTimeout(() => {
+            document.querySelectorAll('.stk-in').forEach(i => {
+                if(p.stock[i.dataset.s] !== undefined) i.value = p.stock[i.dataset.s];
+            });
+        }, 50);
+    }
+
     function resetForm() {
         editId = null;
         document.querySelectorAll('input, textarea').forEach(i => i.value='');
         document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked=false);
-        document.getElementById('formTitle').innerText = "Add Product";
+        document.getElementById('formTitle').innerText = "Add New Product";
+        document.getElementById('saveBtn').innerText = "Save Product";
         document.getElementById('cancelEdit').style.display = "none";
+        document.getElementById('productForm').classList.remove('editing-mode');
+        renderSubSelect();
     }
 
-    // --- REVIEWS ---
-    function renderReviews() {
-        const div = document.getElementById('reviewList');
-        if(appData.reviews.length === 0) div.innerHTML = "<p>No reviews yet.</p>";
-        else {
-            div.innerHTML = appData.reviews.map((r, i) => 
-                `<div class="review-item">
-                    <div class="review-header">
-                        <strong>${r.user}</strong> 
-                        <span>
-                            <button class="btn btn-primary" style="padding:2px 8px; font-size:0.7rem;" onclick="editReview(${i})">Edit</button>
-                            <button class="btn btn-danger" style="padding:2px 8px; font-size:0.7rem;" onclick="delReview(${i})">Del</button>
-                        </span>
-                    </div>
-                    <div style="color:#f59e0b;">${"★".repeat(r.rating)}</div>
-                    <div>${r.text}</div>
-                    <small style="color:#999;">ID: ${r.pid}</small>
-                </div>`
-            ).join('');
+    function deleteProd(id) {
+        if(confirm("Delete this product permanently?")) {
+            appData.products = appData.products.filter(p => p.id !== id);
+            saveData();
         }
     }
 
-    function delReview(i) { if(confirm("Delete?")) { appData.reviews.splice(i, 1); saveData(); } }
-    function editReview(i) { const t = prompt("Edit:", appData.reviews[i].text); if(t) { appData.reviews[i].text = t; saveData(); } }
+    // --- TABLE RENDER (THE IMPORTANT PART) ---
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        
+        if(appData.products.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px; color:#999;'>No products found.</td></tr>";
+            return;
+        }
+
+        // Show newest first
+        appData.products.slice().reverse().forEach(p => {
+            let stockHtml = "";
+            for(let [k,v] of Object.entries(p.stock)) {
+                let cls = v > 0 ? 'ok' : 'low';
+                stockHtml += `<span class="stock-tag ${cls}">${k}: ${v}</span>`;
+            }
+
+            tbody.innerHTML += `
+            <tr style="background:white;">
+                <td><img src="${p.img}" class="thumb" onerror="this.src='https://via.placeholder.com/50'"></td>
+                <td>
+                    <div style="font-weight:600; color:#334155;">${p.name}</div>
+                    <div style="font-size:0.8rem; color:#64748b;">${p.cat}</div>
+                    ${p.isBanner ? '<span style="font-size:0.7rem; background:var(--green); color:white; padding:1px 4px; border-radius:3px;">HOME BANNER</span>' : ''}
+                </td>
+                <td>
+                    <div style="font-weight:600;">₹${p.price}</div>
+                    <div style="font-size:0.8rem; text-decoration:line-through; color:#94a3b8;">${p.mrp ? '₹'+p.mrp : ''}</div>
+                </td>
+                <td>${stockHtml}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline" onclick="startEdit(${p.id})"><i class="ri-pencil-line"></i> Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteProd(${p.id})"><i class="ri-delete-bin-line"></i></button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    // --- BANNERS ---
+    function addCategoryBanner() {
+        const sub = document.getElementById('banCat').value;
+        const media = document.getElementById('banMedia').value;
+        const type = document.getElementById('banType').value;
+        if(sub && media) {
+            appData.catBanners.push({ sub, media, type });
+            saveData();
+        }
+    }
+    
+    function renderBanners() {
+        const div = document.getElementById('bannerGrid');
+        div.innerHTML = appData.catBanners.map((b, i) => 
+            `<div style="position:relative; height:80px; border-radius:6px; overflow:hidden;">
+                ${b.type==='vid' ? '<video src="'+b.media+'" style="width:100%; height:100%; object-fit:cover;"></video>' : '<img src="'+b.media+'" style="width:100%; height:100%; object-fit:cover;">'}
+                <div style="position:absolute; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.6); color:white; font-size:0.7rem; text-align:center;">${b.sub}</div>
+                <div style="position:absolute; top:2px; right:2px; background:red; color:white; width:18px; height:18px; border-radius:50%; text-align:center; line-height:18px; cursor:pointer;" onclick="delBanner(${i})">&times;</div>
+            </div>`
+        ).join('');
+    }
+    function delBanner(i) { appData.catBanners.splice(i,1); saveData(); }
+
 </script>
 </body>
 </html>
