@@ -14,7 +14,6 @@
         .cart-btn { background: white; color: var(--primary); padding: 8px 15px; border-radius: 20px; font-weight: 600; border: none; cursor: pointer; }
         .nav-link { color: white; margin-right: 10px; text-decoration: none; font-size: 0.9rem; cursor: pointer; }
 
-        /* SEARCH & FILTER */
         .search-wrap { padding: 10px 15px; background: white; position: sticky; top: 60px; z-index: 90; }
         .search-input { width: 100%; padding: 12px 20px; border: 1px solid #e2e8f0; border-radius: 50px; background: #f1f5f9; outline: none; box-sizing: border-box; }
 
@@ -53,14 +52,16 @@
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
         .modal-box { background: white; width: 90%; max-width: 500px; height: auto; max-height: 90vh; border-radius: 15px; overflow-y: auto; position: relative; padding: 20px; }
         
-        .track-item { border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; }
-        .track-status { font-weight: bold; color: var(--primary); margin-top: 5px; font-size: 0.9rem; }
-        .track-progress { display: flex; justify-content: space-between; margin-top: 15px; position: relative; }
-        .track-progress::before { content: ''; position: absolute; top: 5px; left: 0; width: 100%; height: 2px; background: #eee; z-index: 0; }
-        .tp-step { position: relative; z-index: 1; text-align: center; font-size: 0.7rem; color: #aaa; }
-        .tp-dot { width: 12px; height: 12px; background: #eee; border-radius: 50%; margin: 0 auto 5px; }
-        .tp-step.active .tp-dot { background: var(--green); transform: scale(1.2); }
-        .tp-step.active { color: var(--green); font-weight: bold; }
+        /* IMAGE GALLERY IN MODAL */
+        .pv-gallery { position: relative; width: 100%; height: 350px; background: #f9f9f9; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+        .pv-main-img { width: 100%; height: 100%; object-fit: contain; }
+        .pv-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.3); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; z-index: 10; }
+        .pv-arrow.left { left: 10px; }
+        .pv-arrow.right { right: 10px; }
+        
+        .thumb-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; }
+        .thumb { width: 50px; height: 50px; border-radius: 6px; border: 2px solid transparent; object-fit: cover; cursor: pointer; }
+        .thumb.active { border-color: var(--primary); }
 
         .btn-full { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; border-radius: 8px; margin-top: 10px; }
         
@@ -76,7 +77,6 @@
         .theme-particle { position: fixed; top: -10%; user-select: none; pointer-events: none; z-index: 10; animation: fall linear forwards; opacity: 0.8; }
         @keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
         
-        /* LOADER */
         #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; color: var(--primary); font-weight: bold; display: none; }
     </style>
 </head>
@@ -132,9 +132,15 @@
 
     <div id="productView" class="modal">
         <div class="modal-box" style="height:90vh;">
-            <div style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.8); border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="document.getElementById('productView').style.display='none'">&times;</div>
+            <div style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.8); border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:20;" onclick="document.getElementById('productView').style.display='none'">&times;</div>
             
-            <img id="pvImg" style="width:100%; height:300px; object-fit:contain; background:#f9f9f9;">
+            <div class="pv-gallery">
+                <div class="pv-arrow left" onclick="changeImg(-1)">&#10094;</div>
+                <img id="pvImg" class="pv-main-img">
+                <div class="pv-arrow right" onclick="changeImg(1)">&#10095;</div>
+            </div>
+            <div class="thumb-row" id="pvThumbs"></div>
+
             <div id="pvVideoBox" style="display:none; padding:10px;"><iframe id="pvVideo" width="100%" height="200" frameborder="0"></iframe></div>
             
             <div style="padding:10px;">
@@ -175,16 +181,7 @@
         <div class="modal-box">
             <h3>Shipping Details</h3>
             <input id="coAddr" placeholder="House No, Building" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px;">
-            <input id="coArea" placeholder="Area, Street" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px;">
-            <div style="display:flex; gap:10px;">
-                <input id="coCity" placeholder="City" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
-                <input id="coPin" placeholder="Pincode" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
-            </div>
-            
-            <div style="background:#f0fdf4; padding:15px; border-radius:8px; margin-top:15px; border:1px dashed var(--green);">
-                <small style="color:var(--green); font-weight:600;"><i class="ri-whatsapp-line"></i> Order details will be sent to WhatsApp. You can discuss payment there.</small>
-            </div>
-
+            <input id="coCity" placeholder="City, Pincode" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
             <button class="btn-full" onclick="placeOrder()">PLACE ORDER ON WHATSAPP</button>
         </div>
     </div>
@@ -204,6 +201,8 @@
         
         let appData = { products: [], reviews: [], catBanners: [], subCategories: {} };
         let cart = [], curProd = null;
+        let currentImgIdx = 0; // For Gallery
+        let currentImages = []; // Stores current product images
         let user = JSON.parse(localStorage.getItem('jijaUser')) || { name: "Guest", phone: "0000000000" };
         let currentCat = 'all', currentSub = 'all';
 
@@ -286,32 +285,29 @@
 
         function applyFilters() {
             let list = appData.products || [];
-            const q = document.getElementById('searchBox').value.toLowerCase();
             
+            const q = document.getElementById('searchBox').value.toLowerCase();
             if(q) list = list.filter(p => p.name.toLowerCase().includes(q));
+            
             if(currentCat!=='all') list = list.filter(p => p.cat === currentCat);
             if(currentSub!=='all') list = list.filter(p => p.subCats && p.subCats.includes(currentSub));
 
-            // Budget
             const budget = document.getElementById('budgetFilter').value;
             if(budget !== 'all') {
                 list = list.filter(p => {
                     const price = parseInt(p.price);
                     if(budget === '500') return price < 500;
                     if(budget === '1000') return price >= 500 && price <= 1000;
-                    if(budget === '2000') return price > 1000 && price <= 2000;
-                    if(budget === 'high') return price > 2000;
+                    if(budget === 'high') return price > 1000;
                     return true;
                 });
             }
 
-            // Size
             const sizeVal = document.getElementById('sizeFilter').value;
             if(sizeVal !== 'all' && document.getElementById('sizeFilter').style.display !== 'none') {
                 list = list.filter(p => p.stock && p.stock[sizeVal] > 0);
             }
 
-            // Rank Sorting
             const sort = document.getElementById('sortSelect').value;
             if(sort === 'low') list.sort((a,b) => a.price - b.price);
             else if(sort === 'high') list.sort((a,b) => b.price - a.price);
@@ -332,7 +328,6 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Show Sub-Cat Chips
             const subRow = document.getElementById('subCatRow');
             const subs = appData.subCategories[cat] || [];
             
@@ -344,7 +339,6 @@
                 subRow.style.display = 'none';
             }
 
-            // Show Size Filter
             const sf = document.getElementById('sizeFilter');
             const sizes = SIZES[cat];
             if(sizes) {
@@ -362,9 +356,18 @@
             applyFilters();
         }
 
+        // --- NEW: GALLERY LOGIC ---
         function openProd(id) {
             curProd = appData.products.find(p => p.id === id);
-            document.getElementById('pvImg').src = curProd.img;
+            
+            // Gather all images
+            currentImages = [curProd.img];
+            if(curProd.img2) currentImages.push(curProd.img2);
+            if(curProd.img3) currentImages.push(curProd.img3);
+            currentImgIdx = 0;
+
+            updateGallery();
+
             document.getElementById('pvTitle').innerText = curProd.name;
             document.getElementById('pvPrice').innerText = '₹' + curProd.price;
             document.getElementById('pvDesc').innerText = curProd.desc || "";
@@ -378,6 +381,27 @@
 
             renderReviews();
             document.getElementById('productView').style.display = 'flex';
+        }
+
+        function updateGallery() {
+            document.getElementById('pvImg').src = currentImages[currentImgIdx];
+            
+            // Thumbs
+            document.getElementById('pvThumbs').innerHTML = currentImages.map((src, i) => 
+                `<img src="${src}" class="thumb ${i === currentImgIdx ? 'active' : ''}" onclick="setGallery(${i})">`
+            ).join('');
+        }
+
+        function changeImg(n) {
+            currentImgIdx += n;
+            if(currentImgIdx >= currentImages.length) currentImgIdx = 0;
+            if(currentImgIdx < 0) currentImgIdx = currentImages.length - 1;
+            updateGallery();
+        }
+
+        function setGallery(idx) {
+            currentImgIdx = idx;
+            updateGallery();
         }
 
         function renderReviews() {
@@ -422,13 +446,11 @@
             const addr = document.getElementById('coAddr').value;
             if(!addr) return alert("Please fill address details");
             
-            document.getElementById('loader').style.display = 'flex'; // Show loading
+            document.getElementById('loader').style.display = 'flex'; 
 
-            // 1. Get FRESH Data (Prevents stock conflicts)
             const r = await fetch(DB_URL);
             const freshData = await r.json();
             
-            // 2. Validate & Deduct
             let valid = true;
             cart.forEach(cItem => {
                 const dbProd = freshData.products.find(p => p.id === cItem.id);
@@ -441,10 +463,8 @@
                 return alert("Some items went out of stock! Please refresh.");
             }
 
-            // 3. Update Inventory in Cloud
             await fetch(DB_URL, { method: "PUT", body: JSON.stringify(freshData) });
 
-            // 4. Create Order Record
             const order = {
                 date: new Date().toISOString(),
                 user: user,
@@ -456,7 +476,6 @@
             };
             await fetch(ORDERS_URL, { method: "POST", body: JSON.stringify(order) });
 
-            // 5. WhatsApp
             let msg = `*NEW ORDER*\nUser: ${user.name}\nAddress: ${order.address.city}\n\nItems:\n`;
             cart.forEach(i => msg += `- ${i.name} (${i.size})\n`);
             msg += `\nTotal: ₹${order.total}`;
