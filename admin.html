@@ -44,11 +44,6 @@
         td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
         .thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0; }
         
-        .status-select { padding: 5px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
-        .status-Ordered { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-        .status-Shipped { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
-        .status-Delivered { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-        
         .stock-tag { display: inline-block; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin: 2px; border: 1px solid #e2e8f0; background: #f8fafc; }
         .stock-tag.low { color: var(--red); border-color: #fca5a5; background: #fef2f2; }
         .stock-tag.ok { color: var(--green); border-color: #86efac; background: #f0fdf4; }
@@ -73,9 +68,7 @@
     </div>
     
     <div class="nav-item active" onclick="showSection('orderSection', this)"><i class="ri-shopping-bag-3-line"></i> Order Manager</div>
-    
     <div class="nav-item" onclick="showSection('catSection', this)"><i class="ri-layout-grid-line"></i> Manage Categories</div>
-    
     <div class="nav-item" onclick="showSection('prodSection', this)"><i class="ri-add-circle-line"></i> Products</div>
     <div class="nav-item" onclick="showSection('layoutSection', this)"><i class="ri-layout-masonry-line"></i> Store Layout</div>
     <div class="nav-item" onclick="showSection('invSection', this)"><i class="ri-list-check"></i> Inventory</div>
@@ -91,7 +84,7 @@
             </div>
             <div style="overflow-x:auto;">
                 <table id="orderTable">
-                    <thead><tr><th>Date</th><th>Customer</th><th>Bill Details</th><th>Status (Update)</th></tr></thead>
+                    <thead><tr><th>Date</th><th>Customer</th><th>Bill Details</th><th>Status</th></tr></thead>
                     <tbody id="orderList"></tbody>
                 </table>
             </div>
@@ -99,7 +92,6 @@
     </div>
 
     <div id="catSection" class="section">
-        
         <div class="card">
             <div class="card-header">Add New Sub-Category</div>
             <div style="display: flex; gap: 10px; align-items: center;">
@@ -114,20 +106,9 @@
                 <button class="btn btn-primary" onclick="addNewSubCategory()">Add</button>
             </div>
             <div style="margin-top:20px;">
-                <label style="font-weight:600; color:#64748b;">Active Sub-Categories (Click X to delete):</label>
+                <label style="font-weight:600; color:#64748b;">Active Sub-Categories:</label>
                 <div id="activeSubTags" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;"></div>
             </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">Category Ads / Banners</div>
-            <div style="display: flex; gap: 10px;">
-                <select id="banCat" style="width: 150px;"><option value="">Link To...</option></select>
-                <select id="banType" style="width: 100px;"><option value="img">Image</option><option value="vid">Video</option></select>
-                <input id="banMedia" placeholder="Media URL" style="flex:1;">
-                <button class="btn btn-primary" onclick="addCategoryBanner()">Add Ad</button>
-            </div>
-            <div id="bannerGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:10px; margin-top:10px;"></div>
         </div>
     </div>
 
@@ -203,9 +184,36 @@
     const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
     const ORDERS_URL = "https://jija-studio-default-rtdb.firebaseio.com/orders.json";
     
-    // Default structure
+    // --- SAMPLE DATA TO PREFILL ---
     let appData = { 
-        products: [], 
+        products: [
+            {
+                id: 1715620000000,
+                name: "Banarasi Red Saree",
+                cat: "cloth",
+                subCats: ["Saree"],
+                price: "1500",
+                mrp: "3000",
+                img: "https://i.pinimg.com/736x/26/50/21/2650212727653632976527.jpg",
+                desc: "Traditional silk saree.",
+                rank: 1,
+                isBanner: true,
+                stock: { "Free Size": 10 }
+            },
+            {
+                id: 1715620000001,
+                name: "Kids Party Dress",
+                cat: "kids",
+                subCats: ["Girls"],
+                price: "850",
+                mrp: "1200",
+                img: "https://i.pinimg.com/564x/4b/6b/5b/4b6b5b5b5b5b5b5b5b5b5b5b5b5b5b5b.jpg",
+                desc: "Pink fluffy frock.",
+                rank: 2,
+                isBanner: false,
+                stock: { "3-4Y": 5, "5-6Y": 2 }
+            }
+        ], 
         catBanners: [], 
         subCategories: { 
             cloth: ["Saree", "Kurti"], 
@@ -232,8 +240,7 @@
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
-        // Initial renders
-        if(id === 'catSection') { renderManageTags(); renderBanners(); }
+        if(id === 'catSection') renderManageTags();
         if(id === 'layoutSection') renderLayoutEditor();
     }
 
@@ -242,11 +249,12 @@
         try {
             const r1 = await fetch(DB_URL);
             const d1 = await r1.json();
-            if(d1) {
-                appData = d1;
-                if(!appData.products) appData.products = [];
-                if(!appData.catBanners) appData.catBanners = [];
-                if(!appData.subCategories) appData.subCategories = {};
+            
+            if(d1 && d1.products) {
+                appData = d1; // Load Cloud Data
+            } else {
+                console.log("DB Empty. Initializing Sample Data...");
+                saveData(); // Save Sample Data if DB empty
             }
 
             const r2 = await fetch(ORDERS_URL);
@@ -269,15 +277,13 @@
         renderSubSelect(); 
         renderManageTags(); 
         renderTable();
-        renderBanners();
     }
 
-    // --- CATEGORY MANAGER LOGIC ---
+    // --- CATEGORY MANAGER ---
     function renderManageTags() {
         const cat = document.getElementById('manageCat').value;
         const subs = appData.subCategories[cat] || [];
-        const container = document.getElementById('activeSubTags');
-        container.innerHTML = subs.map(s => 
+        document.getElementById('activeSubTags').innerHTML = subs.map(s => 
             `<div class="sub-tag">${s} <i class="ri-close-circle-fill" onclick="removeSubCat('${cat}', '${s}')"></i></div>`
         ).join('');
     }
@@ -285,20 +291,18 @@
     function addNewSubCategory() {
         const cat = document.getElementById('manageCat').value;
         const name = document.getElementById('newSubName').value.trim();
-        if(!name) return alert("Enter name");
+        if(!name) return;
         
         if(!appData.subCategories[cat]) appData.subCategories[cat] = [];
         if(!appData.subCategories[cat].includes(name)) {
             appData.subCategories[cat].push(name);
             document.getElementById('newSubName').value = "";
             saveData();
-        } else {
-            alert("Already exists!");
-        }
+        } else alert("Exists!");
     }
 
     function removeSubCat(cat, sub) {
-        if(confirm(`Delete '${sub}' category?`)) {
+        if(confirm(`Delete '${sub}'?`)) {
             appData.subCategories[cat] = appData.subCategories[cat].filter(s => s !== sub);
             saveData();
         }
@@ -308,20 +312,13 @@
     function renderSubSelect() {
         const cat = document.getElementById('pCat').value;
         const subs = appData.subCategories[cat] || [];
-        let html = subs.map(s => `<div style="margin:2px 0;"><input type="checkbox" value="${s}" name="subcat"> ${s}</div>`).join('');
-        document.getElementById('subCatBox').innerHTML = html || "<small>No sub-categories</small>";
-        
-        let allSubs = [];
-        for(let k in appData.subCategories) allSubs = [...allSubs, ...appData.subCategories[k]];
-        document.getElementById('banCat').innerHTML = '<option value="">Link To...</option>' + allSubs.map(s => `<option value="${s}">${s}</option>`).join('');
-        
+        document.getElementById('subCatBox').innerHTML = subs.map(s => `<div style="margin:2px 0;"><input type="checkbox" value="${s}" name="subcat"> ${s}</div>`).join('') || "<small>No sub-categories</small>";
         renderStockInputs(cat);
     }
 
     function renderStockInputs(cat) {
-        const div = document.getElementById('stockGrid');
         const sizes = SIZES[cat] || ["General"];
-        div.innerHTML = sizes.map(s => `<div class="stk-box"><label>${s}</label><input type="number" class="stk-in" data-s="${s}" value="0"></div>`).join('');
+        document.getElementById('stockGrid').innerHTML = sizes.map(s => `<div class="stk-box"><label>${s}</label><input type="number" class="stk-in" data-s="${s}" value="0"></div>`).join('');
     }
 
     function saveProduct() {
@@ -366,7 +363,7 @@
         editId = id;
         showSection('prodSection', document.querySelectorAll('.nav-item')[2]);
         
-        document.getElementById('formTitle').innerText = "Edit Product: " + p.name;
+        document.getElementById('formTitle').innerText = "Edit Product";
         document.getElementById('saveBtn').innerText = "Update Product";
         document.getElementById('cancelEdit').style.display = 'block';
 
@@ -408,13 +405,12 @@
     }
 
     function deleteProd(id) {
-        if(confirm("Delete this product?")) {
+        if(confirm("Delete?")) {
             appData.products = appData.products.filter(p => p.id !== id);
             saveData();
         }
     }
 
-    // --- OTHER UI LOGIC ---
     function renderTable() {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = "";
@@ -450,7 +446,7 @@
             tbody.innerHTML += `
             <tr style="background:white; border-bottom:1px solid #eee;">
                 <td>${new Date(o.date).toLocaleDateString()}<br><small style="color:#888;">${new Date(o.date).toLocaleTimeString()}</small></td>
-                <td><strong>${o.user.name}</strong><br>${o.user.phone}<br><small style="color:#666;">Ref: ${o.txnId}</small></td>
+                <td><strong>${o.user.name}</strong><br>${o.user.phone}</td>
                 <td>${itemsHtml}<div style="font-weight:bold; margin-top:5px; color:var(--primary);">Total: ₹${o.total}</div></td>
                 <td>
                     <select class="status-select status-${o.status}" onchange="updateOrderStatus('${o.key}', this.value)">
@@ -465,9 +461,7 @@
 
     async function updateOrderStatus(id, status) {
         document.getElementById('loader').style.display = 'flex';
-        await fetch(`https://jija-studio-default-rtdb.firebaseio.com/orders/${id}/status.json`, {
-            method: "PUT", body: JSON.stringify(status)
-        });
+        await fetch(`https://jija-studio-default-rtdb.firebaseio.com/orders/${id}/status.json`, { method: "PUT", body: JSON.stringify(status) });
         ordersData[id].status = status;
         renderOrders();
         document.getElementById('loader').style.display = 'none';
@@ -487,28 +481,6 @@
         `).join('');
     }
     function updateRank(id, val) { const p = appData.products.find(x => x.id === id); if(p) p.rank = parseInt(val); }
-
-    function addCategoryBanner() {
-        const sub = document.getElementById('banCat').value;
-        const media = document.getElementById('banMedia').value;
-        const type = document.getElementById('banType').value;
-        if(sub && media) {
-            appData.catBanners.push({ sub, media, type });
-            saveData();
-        }
-    }
-    
-    function renderBanners() {
-        const div = document.getElementById('bannerGrid');
-        div.innerHTML = appData.catBanners.map((b, i) => 
-            `<div style="position:relative; height:80px; border-radius:6px; overflow:hidden; background:black;">
-                ${b.type==='vid' ? '<video src="'+b.media+'" style="width:100%; height:100%; object-fit:cover; opacity:0.7;"></video>' : '<img src="'+b.media+'" style="width:100%; height:100%; object-fit:cover; opacity:0.7;">'}
-                <div style="position:absolute; bottom:0; width:100%; color:white; font-size:0.7rem; text-align:center;">${b.sub}</div>
-                <div style="position:absolute; top:2px; right:2px; background:red; color:white; width:18px; height:18px; border-radius:50%; text-align:center; cursor:pointer;" onclick="delBanner(${i})">&times;</div>
-            </div>`
-        ).join('');
-    }
-    function delBanner(i) { appData.catBanners.splice(i,1); saveData(); }
 </script>
 </body>
 </html>
