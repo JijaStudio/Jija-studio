@@ -28,17 +28,14 @@
         .btn-danger { background: var(--red); color: white; }
         .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
 
-        /* TAGS FOR SUB-CATS */
         .sub-tag { background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; margin: 3px; border: 1px solid #cbd5e1; }
         .sub-tag i { color: var(--red); cursor: pointer; }
 
-        /* STOCK GRID */
         .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
         .stk-box { background: #f8fafc; padding: 5px; border: 1px solid #cbd5e1; border-radius: 5px; text-align: center; }
         .stk-box label { font-size: 0.75rem; display: block; font-weight: 600; margin-bottom: 3px; }
         .stk-box input { margin: 0; text-align: center; font-weight: 700; }
 
-        /* TABLES */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size:0.9rem; }
         th { text-align: left; padding: 12px; background: #f1f5f9; color: #64748b; font-weight: 600; border-bottom: 2px solid #e2e8f0; }
         td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
@@ -53,7 +50,6 @@
         .stock-tag.low { color: var(--red); border-color: #fca5a5; background: #fef2f2; }
         .stock-tag.ok { color: var(--green); border-color: #86efac; background: #f0fdf4; }
 
-        /* SECTIONS & LOADER */
         .section { display: none; }
         .section.active { display: block; }
         .editing-mode { border: 2px solid var(--edit); background-color: #fffbeb; }
@@ -73,9 +69,7 @@
     </div>
     
     <div class="nav-item active" onclick="showSection('orderSection', this)"><i class="ri-shopping-bag-3-line"></i> Order Manager</div>
-    
     <div class="nav-item" onclick="showSection('catSection', this)"><i class="ri-layout-grid-line"></i> Manage Categories</div>
-    
     <div class="nav-item" onclick="showSection('prodSection', this)"><i class="ri-add-circle-line"></i> Products</div>
     <div class="nav-item" onclick="showSection('layoutSection', this)"><i class="ri-layout-masonry-line"></i> Store Layout</div>
     <div class="nav-item" onclick="showSection('invSection', this)"><i class="ri-list-check"></i> Inventory</div>
@@ -99,7 +93,6 @@
     </div>
 
     <div id="catSection" class="section">
-        
         <div class="card">
             <div class="card-header">Add New Sub-Category</div>
             <div style="display: flex; gap: 10px; align-items: center;">
@@ -114,7 +107,7 @@
                 <button class="btn btn-primary" onclick="addNewSubCategory()">Add</button>
             </div>
             <div style="margin-top:20px;">
-                <label style="font-weight:600; color:#64748b;">Active Sub-Categories (Click X to delete):</label>
+                <label style="font-weight:600; color:#64748b;">Active Sub-Categories:</label>
                 <div id="activeSubTags" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;"></div>
             </div>
         </div>
@@ -140,6 +133,8 @@
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
                     <input id="pName" placeholder="Product Name">
+                    
+                    <label style="font-size:0.8rem; font-weight:bold; color:#64748b;">Main Category</label>
                     <select id="pCat" onchange="renderSubSelect()">
                         <option value="cloth">Adult Fashion</option>
                         <option value="kids">Kids Wear</option>
@@ -147,7 +142,11 @@
                         <option value="jewelry">Jewelry</option>
                         <option value="toy">Toy</option>
                     </select>
-                    <div class="multi-select-box" id="subCatBox"></div>
+
+                    <label style="font-size:0.8rem; font-weight:bold; color:#64748b; margin-top:10px; display:block;">Sub-Category</label>
+                    <select id="pSubCat">
+                        <option value="">Select Option</option>
+                    </select>
                 </div>
                 <div>
                     <input id="pPrice" type="number" placeholder="Selling Price">
@@ -203,16 +202,15 @@
     const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
     const ORDERS_URL = "https://jija-studio-default-rtdb.firebaseio.com/orders.json";
     
-    // Default structure
     let appData = { 
         products: [], 
         catBanners: [], 
         subCategories: { 
-            cloth: ["Saree", "Kurti"], 
+            cloth: ["Saree", "Kurti", "Lehenga"], 
             kids: ["Boys", "Girls"], 
             footwear: ["Shoes", "Sandals"], 
             jewelry: ["Necklace", "Bangles"], 
-            toy: ["Cars"] 
+            toy: ["Cars", "Dolls"] 
         } 
     };
     let ordersData = {};
@@ -232,7 +230,6 @@
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
-        // Initial renders
         if(id === 'catSection') { renderManageTags(); renderBanners(); }
         if(id === 'layoutSection') renderLayoutEditor();
     }
@@ -304,12 +301,14 @@
         }
     }
 
-    // --- PRODUCT LOGIC ---
+    // --- PRODUCT LOGIC (Modified to use Dropdown) ---
     function renderSubSelect() {
         const cat = document.getElementById('pCat').value;
         const subs = appData.subCategories[cat] || [];
-        let html = subs.map(s => `<div style="margin:2px 0;"><input type="checkbox" value="${s}" name="subcat"> ${s}</div>`).join('');
-        document.getElementById('subCatBox').innerHTML = html || "<small>No sub-categories</small>";
+        
+        // STANDARD DROPDOWN POPULATION
+        const subSelect = document.getElementById('pSubCat');
+        subSelect.innerHTML = '<option value="">Select Option</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
         
         let allSubs = [];
         for(let k in appData.subCategories) allSubs = [...allSubs, ...appData.subCategories[k]];
@@ -326,9 +325,10 @@
 
     function saveProduct() {
         const name = document.getElementById('pName').value;
+        const subCatVal = document.getElementById('pSubCat').value;
         if(!name) return alert("Name required");
+        if(!subCatVal) return alert("Select Sub-Category");
         
-        const subs = Array.from(document.querySelectorAll('input[name="subcat"]:checked')).map(cb => cb.value);
         let stock = {};
         document.querySelectorAll('.stk-in').forEach(i => stock[i.dataset.s] = parseInt(i.value)||0);
 
@@ -336,7 +336,7 @@
             id: editId || Date.now(),
             name,
             cat: document.getElementById('pCat').value,
-            subCats: subs,
+            subCats: [subCatVal], // Store as array for compatibility
             price: document.getElementById('pPrice').value,
             mrp: document.getElementById('pMrp').value,
             badge: document.getElementById('pBadge').value,
@@ -383,12 +383,13 @@
         document.getElementById('pDesc').value = p.desc || "";
         document.getElementById('pBanner').checked = p.isBanner;
 
-        renderSubSelect(); 
-        if(p.subCats) {
-            document.querySelectorAll('input[name="subcat"]').forEach(cb => {
-                if(p.subCats.includes(cb.value)) cb.checked = true;
-            });
+        renderSubSelect(); // Refresh dropdown
+        
+        // Set Sub Category value
+        if(p.subCats && p.subCats.length > 0) {
+            document.getElementById('pSubCat').value = p.subCats[0];
         }
+
         setTimeout(() => {
             document.querySelectorAll('.stk-in').forEach(i => {
                 if(p.stock[i.dataset.s] !== undefined) i.value = p.stock[i.dataset.s];
@@ -414,7 +415,7 @@
         }
     }
 
-    // --- OTHER UI LOGIC ---
+    // --- TABLES & ORDERS ---
     function renderTable() {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = "";
