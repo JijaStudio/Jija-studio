@@ -8,19 +8,31 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         :root { --primary: #D81B60; --dark: #1e293b; --light: #f8fafc; --white: #ffffff; --green: #10b981; }
-        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--light); padding-bottom: 80px; overflow-x: hidden; }
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--light); padding-bottom: 80px; }
         
         header { background: var(--primary); padding: 15px; display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .cart-btn { background: white; color: var(--primary); padding: 8px 15px; border-radius: 20px; font-weight: 600; border: none; cursor: pointer; }
         .nav-link { color: white; margin-right: 10px; text-decoration: none; font-size: 0.9rem; cursor: pointer; }
 
-        .search-wrap { padding: 10px 15px; background: white; position: sticky; top: 60px; z-index: 90; }
+        /* SEARCH & FILTER AREA */
+        .search-wrap { padding: 10px 15px; background: white; position: sticky; top: 60px; z-index: 90; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .search-input { width: 100%; padding: 12px 20px; border: 1px solid #e2e8f0; border-radius: 50px; background: #f1f5f9; outline: none; box-sizing: border-box; }
 
-        .tabs { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; background: white; margin-bottom: 5px; }
+        /* MAIN CATEGORY TABS */
+        .tabs { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; background: white; border-bottom: 1px solid #eee; }
         .tab-btn { padding: 8px 18px; border: 1px solid #e2e8f0; background: white; border-radius: 30px; font-size: 0.9rem; color: #64748b; white-space: nowrap; cursor: pointer; transition: 0.2s; font-weight: 500; }
         .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
+        /* SUB-CATEGORY CHIPS (AMAZON STYLE) */
+        .sub-cat-row { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; background: #f1f5f9; display: none; } /* Hidden by default */
+        .sub-chip { background: white; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #475569; white-space: nowrap; cursor: pointer; }
+        .sub-chip.active { background: #334155; color: white; border-color: #334155; }
+
+        /* BUDGET & SORT FILTERS */
+        .filter-options { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; }
+        .filter-select { padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: white; font-size: 0.85rem; outline: none; color: #475569; }
+
+        /* SLIDER & GRID */
         .hero-slider { height: 240px; margin: 10px 15px; border-radius: 12px; overflow: hidden; position: relative; display: none; background: #ddd; }
         .slide { position: absolute; inset: 0; opacity: 0; transition: 0.5s; display: flex; align-items: center; justify-content: center; }
         .slide.active { opacity: 1; }
@@ -39,6 +51,7 @@
         .title { font-size: 0.9rem; margin: 0 0 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .price { font-weight: 700; font-size: 1.1rem; }
 
+        /* MODALS */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
         .modal-box { background: white; width: 90%; max-width: 500px; height: auto; max-height: 90vh; border-radius: 15px; overflow-y: auto; position: relative; padding: 20px; }
         
@@ -64,20 +77,9 @@
         .review-box { margin-top: 20px; padding-top: 10px; border-top: 1px solid #eee; }
         .review-item { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; }
 
-        /* --- ✨ THEME ANIMATION CSS --- */
-        .theme-particle {
-            position: fixed;
-            top: -10%;
-            user-select: none;
-            pointer-events: none;
-            z-index: 10; /* Behind Modals(2000) and Header(100), but above content */
-            animation: fall linear forwards;
-            opacity: 0.8;
-        }
-        @keyframes fall {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
-        }
+        /* THEME PARTICLES */
+        .theme-particle { position: fixed; top: -10%; user-select: none; pointer-events: none; z-index: 10; animation: fall linear forwards; opacity: 0.8; }
+        @keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -103,6 +105,28 @@
         <button class="tab-btn" onclick="setCat('footwear', this)">Footwear</button>
         <button class="tab-btn" onclick="setCat('jewelry', this)">Jewelry</button>
         <button class="tab-btn" onclick="setCat('toy', this)">Toys</button>
+    </div>
+
+    <div id="subCatRow" class="sub-cat-row"></div>
+
+    <div class="filter-options">
+        <select id="budgetFilter" class="filter-select" onchange="applyFilters()">
+            <option value="all">💰 Any Budget</option>
+            <option value="500">Under ₹500</option>
+            <option value="1000">₹500 - ₹1000</option>
+            <option value="2000">₹1000 - ₹2000</option>
+            <option value="high">Above ₹2000</option>
+        </select>
+
+        <select id="sortSelect" class="filter-select" onchange="applyFilters()">
+            <option value="new">🌟 Newest First</option>
+            <option value="low">Price: Low to High</option>
+            <option value="high">Price: High to Low</option>
+        </select>
+
+        <select id="sizeFilter" class="filter-select" style="display:none;" onchange="applyFilters()">
+            <option value="all">📏 All Sizes</option>
+        </select>
     </div>
 
     <div id="heroSlider" class="hero-slider"></div>
@@ -160,7 +184,6 @@
             </div>
             <label style="font-weight:600; font-size:0.9rem;">Enter Transaction ID / Ref No:</label>
             <input id="txnId" placeholder="e.g. T12345678" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-top:5px;" oninput="checkTxn()">
-            
             <button id="btnConfirm" class="btn-full btn-disabled" onclick="confirmOrder()" disabled>VERIFY & PLACE ORDER</button>
             <button onclick="document.getElementById('payModal').style.display='none'" style="width:100%; padding:10px; border:none; background:none; margin-top:5px; color:red;">Cancel</button>
         </div>
@@ -189,15 +212,22 @@
         const ADMIN_PHONE = "918830903621";
         const MERCHANT_UPI = "918830903621@upi"; // 👈 YOUR UPI ID
         
-        let appData = { products: [], reviews: [], catBanners: [] };
+        let appData = { products: [], reviews: [], catBanners: [], subCategories: {} };
         let cart = [], curProd = null;
         let user = JSON.parse(localStorage.getItem('jijaUser')) || { name: "Guest", phone: "0000000000" };
         let currentCat = 'all';
+        let currentSub = 'all';
+
+        const SIZES = {
+            cloth: ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "Free Size"],
+            kids: ["0-1Y", "1-2Y", "2-3Y", "3-4Y", "4-5Y", "5-6Y", "6-7Y", "7-8Y", "8-9Y", "9-10Y", "11-12Y", "13-14Y"],
+            footwear: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+            jewelry: ["2-2", "2-4", "2-6", "2-8", "2-10", "Free Size"]
+        };
 
         window.onload = async () => {
-            applyTheme(); // 1. Theme First
-            startThemeAnimations(); // 2. Start Floating Characters
-            
+            applyTheme(); 
+            startThemeAnimations(); 
             const r = await fetch(DB_URL);
             const d = await r.json();
             if(d) {
@@ -205,62 +235,41 @@
                 if(!appData.products) appData.products=[];
                 if(!appData.reviews) appData.reviews=[];
                 if(!appData.catBanners) appData.catBanners=[];
+                // Ensure subCategories is an object
+                if (Array.isArray(appData.subCategories)) {
+                    appData.subCategories = { cloth: appData.subCategories, kids: ["Boys"], footwear: ["Shoes"], jewelry: ["Necklace"], toy: ["Cars"] };
+                }
                 renderHome();
                 initSlider();
             }
         };
 
-        // --- ✨ ANIMATION ENGINE ---
         function startThemeAnimations() {
-            let t = localStorage.getItem('jijaTheme');
-            if(!t || t === 'auto') {
-                const d = new Date();
-                const m = d.getMonth() + 1; 
-                if (m===10 || m===11) t = 'diwali';
-                else if (m===12) t = 'christmas';
-                else if (m===3) t = 'holi';
-                else if (m===2) t = 'valentine';
-                else t = 'default';
-            }
-
-            // Define Particles
+            let t = localStorage.getItem('jijaTheme') || 'default';
+            if(t==='auto') t = 'default'; // Simplified auto logic for demo
+            
             let symbols = [];
             if(t === 'christmas') symbols = ['❄️', '⛄', '🎄'];
             else if(t === 'diwali') symbols = ['🪔', '✨', '🎆'];
             else if(t === 'holi') symbols = ['🟣', '🟡', '🟢', '🔴'];
             else if(t === 'valentine') symbols = ['❤️', '💖', '💌'];
             else if(t === 'newyear') symbols = ['🎉', '🥂', '🎊'];
-            else return; // No animation for default
+            else return; 
 
-            // Spawner
             setInterval(() => {
                 const p = document.createElement('div');
                 p.classList.add('theme-particle');
                 p.innerText = symbols[Math.floor(Math.random() * symbols.length)];
                 p.style.left = Math.random() * 100 + 'vw';
                 p.style.fontSize = (Math.random() * 20 + 15) + 'px';
-                p.style.animationDuration = (Math.random() * 3 + 4) + 's'; // 4-7s fall time
+                p.style.animationDuration = (Math.random() * 3 + 4) + 's'; 
                 document.body.appendChild(p);
-                
-                // Cleanup
                 setTimeout(() => p.remove(), 7000);
-            }, 800); // 1 particle every 800ms
+            }, 800); 
         }
 
         function applyTheme() {
-            let t = localStorage.getItem('jijaTheme');
-            if (!t || t === 'auto') {
-                const d = new Date();
-                const m = d.getMonth() + 1;
-                const day = d.getDate();
-                if (m === 10 || m === 11) t = 'diwali';
-                else if (m === 12 && day > 10) t = 'christmas';
-                else if (m === 1 || (m === 12 && day === 31)) t = 'newyear';
-                else if (m === 2 && day > 7 && day < 15) t = 'valentine';
-                else if (m === 3) t = 'holi';
-                else t = 'default';
-            }
-
+            let t = localStorage.getItem('jijaTheme') || 'default';
             const r = document.documentElement.style;
             if(t === 'diwali') { r.setProperty('--primary', '#ea580c'); }
             else if(t === 'christmas') { r.setProperty('--primary', '#15803d'); }
@@ -290,11 +299,41 @@
 
         function applyFilters() {
             let list = appData.products || [];
+            
+            // Search
             const q = document.getElementById('searchBox').value.toLowerCase();
             if(q) list = list.filter(p => p.name.toLowerCase().includes(q));
+            
+            // Main Category
             if(currentCat!=='all') list = list.filter(p => p.cat === currentCat);
             
-            list.sort((a,b) => (a.rank||100) - (b.rank||100));
+            // Sub-Category
+            if(currentSub!=='all') list = list.filter(p => p.subCats && p.subCats.includes(currentSub));
+
+            // Budget Filter
+            const budget = document.getElementById('budgetFilter').value;
+            if(budget !== 'all') {
+                list = list.filter(p => {
+                    const price = parseInt(p.price);
+                    if(budget === '500') return price < 500;
+                    if(budget === '1000') return price >= 500 && price <= 1000;
+                    if(budget === '2000') return price > 1000 && price <= 2000;
+                    if(budget === 'high') return price > 2000;
+                    return true;
+                });
+            }
+
+            // Size Filter
+            const sizeVal = document.getElementById('sizeFilter').value;
+            if(sizeVal !== 'all' && document.getElementById('sizeFilter').style.display !== 'none') {
+                list = list.filter(p => p.stock && p.stock[sizeVal] > 0);
+            }
+
+            // Sort
+            const sort = document.getElementById('sortSelect').value;
+            if(sort === 'low') list.sort((a,b) => a.price - b.price);
+            else if(sort === 'high') list.sort((a,b) => b.price - a.price);
+            else list.sort((a,b) => (a.rank||100) - (b.rank||100));
 
             document.getElementById('grid').innerHTML = list.map(p => `
                 <div class="card" onclick="openProd(${p.id})">
@@ -307,7 +346,36 @@
 
         function setCat(cat, btn) {
             currentCat = cat;
+            currentSub = 'all'; // Reset Sub
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Show Sub-Cat Chips
+            const subRow = document.getElementById('subCatRow');
+            const subs = appData.subCategories[cat] || [];
+            
+            if(subs.length > 0) {
+                subRow.style.display = 'flex';
+                subRow.innerHTML = `<div class="sub-chip active" onclick="filterSub('all', this)">All</div>` + 
+                    subs.map(s => `<div class="sub-chip" onclick="filterSub('${s}', this)">${s}</div>`).join('');
+            } else {
+                subRow.style.display = 'none';
+            }
+
+            // Show Size Filter
+            const sf = document.getElementById('sizeFilter');
+            const sizes = SIZES[cat];
+            if(sizes) {
+                sf.style.display = 'block';
+                sf.innerHTML = '<option value="all">📏 All Sizes</option>' + sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+            } else sf.style.display = 'none';
+
+            applyFilters();
+        }
+
+        function filterSub(sub, btn) {
+            currentSub = sub;
+            document.querySelectorAll('.sub-chip').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
             applyFilters();
         }
