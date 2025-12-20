@@ -28,9 +28,13 @@
         .btn-danger { background: var(--red); color: white; }
         .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
 
-        .sub-tag { background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; margin: 3px; border: 1px solid #cbd5e1; }
-        .sub-tag i { color: var(--red); cursor: pointer; }
+        /* PRODUCT TAGS STYLE */
+        .prod-tags-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: -5px; margin-bottom: 10px; }
+        .prod-tag { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; color: #334155; }
+        .prod-tag i { cursor: pointer; color: var(--red); font-weight: bold; }
+        .prod-tag:hover { background: #e2e8f0; }
 
+        /* STOCK GRID */
         .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
         .stk-box { background: #f8fafc; padding: 5px; border: 1px solid #cbd5e1; border-radius: 5px; text-align: center; }
         .stk-box label { font-size: 0.75rem; display: block; font-weight: 600; margin-bottom: 3px; }
@@ -41,11 +45,6 @@
         td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
         .thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0; }
         
-        .status-select { padding: 5px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
-        .status-Ordered { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-        .status-Shipped { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
-        .status-Delivered { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-        
         .stock-tag { display: inline-block; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin: 2px; border: 1px solid #e2e8f0; background: #f8fafc; }
         .stock-tag.low { color: var(--red); border-color: #fca5a5; background: #fef2f2; }
         .stock-tag.ok { color: var(--green); border-color: #86efac; background: #f0fdf4; }
@@ -53,9 +52,14 @@
         .section { display: none; }
         .section.active { display: block; }
         .editing-mode { border: 2px solid var(--edit); background-color: #fffbeb; }
+        
         #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 999; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        /* CATEGORY MANAGER TAGS */
+        .sub-tag { background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; margin: 3px; border: 1px solid #cbd5e1; }
+        .sub-tag i { color: var(--red); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -85,7 +89,7 @@
             </div>
             <div style="overflow-x:auto;">
                 <table id="orderTable">
-                    <thead><tr><th>Date</th><th>Customer</th><th>Bill Details</th><th>Status (Update)</th></tr></thead>
+                    <thead><tr><th>Date</th><th>Customer</th><th>Bill Details</th><th>Status</th></tr></thead>
                     <tbody id="orderList"></tbody>
                 </table>
             </div>
@@ -143,10 +147,12 @@
                         <option value="toy">Toy</option>
                     </select>
 
-                    <label style="font-size:0.8rem; font-weight:bold; color:#64748b; margin-top:10px; display:block;">Sub-Category</label>
-                    <select id="pSubCat">
-                        <option value="">Select Option</option>
+                    <label style="font-size:0.8rem; font-weight:bold; color:#64748b; margin-top:10px; display:block;">Sub-Categories (Select multiple)</label>
+                    <select id="pSubCatDropdown" onchange="addProductTag(this)">
+                        <option value="">Select & Add...</option>
                     </select>
+                    
+                    <div id="productTagsBox" class="prod-tags-container"></div>
                 </div>
                 <div>
                     <input id="pPrice" type="number" placeholder="Selling Price">
@@ -215,6 +221,7 @@
     };
     let ordersData = {};
     let editId = null;
+    let currentProdTags = []; // Temporary storage for selected sub-cats
 
     const SIZES = {
         cloth: ["S","M","L","XL","XXL","Free Size"],
@@ -269,12 +276,11 @@
         renderBanners();
     }
 
-    // --- CATEGORY MANAGER LOGIC ---
+    // --- CATEGORY MANAGER ---
     function renderManageTags() {
         const cat = document.getElementById('manageCat').value;
         const subs = appData.subCategories[cat] || [];
-        const container = document.getElementById('activeSubTags');
-        container.innerHTML = subs.map(s => 
+        document.getElementById('activeSubTags').innerHTML = subs.map(s => 
             `<div class="sub-tag">${s} <i class="ri-close-circle-fill" onclick="removeSubCat('${cat}', '${s}')"></i></div>`
         ).join('');
     }
@@ -289,9 +295,7 @@
             appData.subCategories[cat].push(name);
             document.getElementById('newSubName').value = "";
             saveData();
-        } else {
-            alert("Already exists!");
-        }
+        } else alert("Already exists!");
     }
 
     function removeSubCat(cat, sub) {
@@ -301,20 +305,43 @@
         }
     }
 
-    // --- PRODUCT LOGIC (Modified to use Dropdown) ---
+    // --- PRODUCT LOGIC (MULTI TAGS) ---
     function renderSubSelect() {
         const cat = document.getElementById('pCat').value;
         const subs = appData.subCategories[cat] || [];
         
-        // STANDARD DROPDOWN POPULATION
-        const subSelect = document.getElementById('pSubCat');
-        subSelect.innerHTML = '<option value="">Select Option</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
+        // Populate Dropdown
+        const dropdown = document.getElementById('pSubCatDropdown');
+        dropdown.innerHTML = '<option value="">Select & Add...</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
         
+        // Banner Dropdown
         let allSubs = [];
         for(let k in appData.subCategories) allSubs = [...allSubs, ...appData.subCategories[k]];
         document.getElementById('banCat').innerHTML = '<option value="">Link To...</option>' + allSubs.map(s => `<option value="${s}">${s}</option>`).join('');
         
         renderStockInputs(cat);
+        renderProductTags();
+    }
+
+    function addProductTag(selectEl) {
+        const val = selectEl.value;
+        if(val && !currentProdTags.includes(val)) {
+            currentProdTags.push(val);
+            renderProductTags();
+        }
+        selectEl.value = ""; // Reset dropdown
+    }
+
+    function removeProductTag(tag) {
+        currentProdTags = currentProdTags.filter(t => t !== tag);
+        renderProductTags();
+    }
+
+    function renderProductTags() {
+        const container = document.getElementById('productTagsBox');
+        container.innerHTML = currentProdTags.map(tag => 
+            `<div class="prod-tag">${tag} <i class="ri-close-line" onclick="removeProductTag('${tag}')"></i></div>`
+        ).join('');
     }
 
     function renderStockInputs(cat) {
@@ -325,9 +352,8 @@
 
     function saveProduct() {
         const name = document.getElementById('pName').value;
-        const subCatVal = document.getElementById('pSubCat').value;
         if(!name) return alert("Name required");
-        if(!subCatVal) return alert("Select Sub-Category");
+        if(currentProdTags.length === 0) return alert("Add at least 1 sub-category");
         
         let stock = {};
         document.querySelectorAll('.stk-in').forEach(i => stock[i.dataset.s] = parseInt(i.value)||0);
@@ -336,7 +362,7 @@
             id: editId || Date.now(),
             name,
             cat: document.getElementById('pCat').value,
-            subCats: [subCatVal], // Store as array for compatibility
+            subCats: currentProdTags, // Save Array of Tags
             price: document.getElementById('pPrice').value,
             mrp: document.getElementById('pMrp').value,
             badge: document.getElementById('pBadge').value,
@@ -383,12 +409,8 @@
         document.getElementById('pDesc').value = p.desc || "";
         document.getElementById('pBanner').checked = p.isBanner;
 
-        renderSubSelect(); // Refresh dropdown
-        
-        // Set Sub Category value
-        if(p.subCats && p.subCats.length > 0) {
-            document.getElementById('pSubCat').value = p.subCats[0];
-        }
+        currentProdTags = p.subCats || []; // Load tags
+        renderSubSelect(); 
 
         setTimeout(() => {
             document.querySelectorAll('.stk-in').forEach(i => {
@@ -399,6 +421,7 @@
 
     function resetForm() {
         editId = null;
+        currentProdTags = [];
         document.querySelectorAll('input, textarea').forEach(i => i.value='');
         document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked=false);
         document.getElementById('pRank').value = 100;
@@ -415,11 +438,9 @@
         }
     }
 
-    // --- TABLES & ORDERS ---
     function renderTable() {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = "";
-        
         appData.products.slice().reverse().forEach(p => {
             let stockHtml = "";
             for(let [k,v] of Object.entries(p.stock)) {
