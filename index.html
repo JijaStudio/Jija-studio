@@ -14,25 +14,23 @@
         .cart-btn { background: white; color: var(--primary); padding: 8px 15px; border-radius: 20px; font-weight: 600; border: none; cursor: pointer; }
         .nav-link { color: white; margin-right: 10px; text-decoration: none; font-size: 0.9rem; cursor: pointer; }
 
-        /* SEARCH & FILTER AREA */
-        .search-wrap { padding: 10px 15px; background: white; position: sticky; top: 60px; z-index: 90; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        /* SEARCH & FILTER */
+        .search-wrap { padding: 10px 15px; background: white; position: sticky; top: 60px; z-index: 90; }
         .search-input { width: 100%; padding: 12px 20px; border: 1px solid #e2e8f0; border-radius: 50px; background: #f1f5f9; outline: none; box-sizing: border-box; }
 
-        /* MAIN CATEGORY TABS */
-        .tabs { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; background: white; border-bottom: 1px solid #eee; }
+        .tabs { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; background: white; margin-bottom: 5px; }
         .tab-btn { padding: 8px 18px; border: 1px solid #e2e8f0; background: white; border-radius: 30px; font-size: 0.9rem; color: #64748b; white-space: nowrap; cursor: pointer; transition: 0.2s; font-weight: 500; }
         .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* SUB-CATEGORY CHIPS (AMAZON STYLE) */
-        .sub-cat-row { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; background: #f1f5f9; display: none; } /* Hidden by default */
+        /* SUB-CATEGORY CHIPS */
+        .sub-cat-row { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; background: #f1f5f9; display: none; }
         .sub-chip { background: white; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #475569; white-space: nowrap; cursor: pointer; }
         .sub-chip.active { background: #334155; color: white; border-color: #334155; }
 
-        /* BUDGET & SORT FILTERS */
+        /* FILTERS */
         .filter-options { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; }
         .filter-select { padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: white; font-size: 0.85rem; outline: none; color: #475569; }
 
-        /* SLIDER & GRID */
         .hero-slider { height: 240px; margin: 10px 15px; border-radius: 12px; overflow: hidden; position: relative; display: none; background: #ddd; }
         .slide { position: absolute; inset: 0; opacity: 0; transition: 0.5s; display: flex; align-items: center; justify-content: center; }
         .slide.active { opacity: 1; }
@@ -55,9 +53,6 @@
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
         .modal-box { background: white; width: 90%; max-width: 500px; height: auto; max-height: 90vh; border-radius: 15px; overflow-y: auto; position: relative; padding: 20px; }
         
-        .qr-box { background: #f0fdf4; border: 2px dashed var(--green); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
-        .qr-img { width: 200px; height: 200px; mix-blend-mode: multiply; }
-        
         .track-item { border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; }
         .track-status { font-weight: bold; color: var(--primary); margin-top: 5px; font-size: 0.9rem; }
         .track-progress { display: flex; justify-content: space-between; margin-top: 15px; position: relative; }
@@ -68,8 +63,8 @@
         .tp-step.active { color: var(--green); font-weight: bold; }
 
         .btn-full { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; border-radius: 8px; margin-top: 10px; }
-        .btn-disabled { background: #ccc; cursor: not-allowed; }
         
+        /* SIMILAR & REVIEWS */
         .similar-row { display: flex; gap: 10px; overflow-x: auto; margin-top: 20px; }
         .sim-card { min-width: 120px; }
         .sim-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
@@ -80,9 +75,14 @@
         /* THEME PARTICLES */
         .theme-particle { position: fixed; top: -10%; user-select: none; pointer-events: none; z-index: 10; animation: fall linear forwards; opacity: 0.8; }
         @keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+        
+        /* LOADER */
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; color: var(--primary); font-weight: bold; display: none; }
     </style>
 </head>
 <body>
+
+    <div id="loader">Processing...</div>
 
     <header>
         <div style="display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.2rem;">
@@ -111,19 +111,16 @@
 
     <div class="filter-options">
         <select id="budgetFilter" class="filter-select" onchange="applyFilters()">
-            <option value="all">💰 Any Budget</option>
+            <option value="all">💰 Budget</option>
             <option value="500">Under ₹500</option>
             <option value="1000">₹500 - ₹1000</option>
-            <option value="2000">₹1000 - ₹2000</option>
-            <option value="high">Above ₹2000</option>
+            <option value="high">Above ₹1000</option>
         </select>
-
         <select id="sortSelect" class="filter-select" onchange="applyFilters()">
-            <option value="new">🌟 Newest First</option>
+            <option value="new">🌟 Newest</option>
             <option value="low">Price: Low to High</option>
             <option value="high">Price: High to Low</option>
         </select>
-
         <select id="sizeFilter" class="filter-select" style="display:none;" onchange="applyFilters()">
             <option value="all">📏 All Sizes</option>
         </select>
@@ -169,23 +166,8 @@
             <h3>Your Cart</h3>
             <div id="cartList"></div>
             <div style="margin-top:15px; font-weight:bold; text-align:right;">Total: ₹<span id="cartTotal">0</span></div>
-            <button class="btn-full" onclick="openPayment()">PROCEED TO PAY</button>
+            <button class="btn-full" onclick="openCheckout()">PROCEED TO CHECKOUT</button>
             <button onclick="document.getElementById('cartModal').style.display='none'" style="width:100%; padding:10px; border:none; background:none; margin-top:5px;">Close</button>
-        </div>
-    </div>
-
-    <div id="payModal" class="modal">
-        <div class="modal-box">
-            <h3 style="text-align:center;">Scan to Pay</h3>
-            <div class="qr-box">
-                <img id="qrImage" src="" class="qr-img">
-                <div style="margin-top:10px; font-weight:bold; font-size:1.2rem;">₹<span id="payAmount">0</span></div>
-                <small style="color:var(--green);">Exact amount pre-filled</small>
-            </div>
-            <label style="font-weight:600; font-size:0.9rem;">Enter Transaction ID / Ref No:</label>
-            <input id="txnId" placeholder="e.g. T12345678" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-top:5px;" oninput="checkTxn()">
-            <button id="btnConfirm" class="btn-full btn-disabled" onclick="confirmOrder()" disabled>VERIFY & PLACE ORDER</button>
-            <button onclick="document.getElementById('payModal').style.display='none'" style="width:100%; padding:10px; border:none; background:none; margin-top:5px; color:red;">Cancel</button>
         </div>
     </div>
 
@@ -193,8 +175,17 @@
         <div class="modal-box">
             <h3>Shipping Details</h3>
             <input id="coAddr" placeholder="House No, Building" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px;">
-            <input id="coCity" placeholder="City, Pincode" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <button class="btn-full" onclick="moveToPay()">Next: Payment</button>
+            <input id="coArea" placeholder="Area, Street" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px;">
+            <div style="display:flex; gap:10px;">
+                <input id="coCity" placeholder="City" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                <input id="coPin" placeholder="Pincode" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            </div>
+            
+            <div style="background:#f0fdf4; padding:15px; border-radius:8px; margin-top:15px; border:1px dashed var(--green);">
+                <small style="color:var(--green); font-weight:600;"><i class="ri-whatsapp-line"></i> Order details will be sent to WhatsApp. You can discuss payment there.</small>
+            </div>
+
+            <button class="btn-full" onclick="placeOrder()">PLACE ORDER ON WHATSAPP</button>
         </div>
     </div>
 
@@ -210,13 +201,11 @@
         const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
         const ORDERS_URL = "https://jija-studio-default-rtdb.firebaseio.com/orders.json";
         const ADMIN_PHONE = "918830903621";
-        const MERCHANT_UPI = "918830903621@upi"; // 👈 YOUR UPI ID
         
         let appData = { products: [], reviews: [], catBanners: [], subCategories: {} };
         let cart = [], curProd = null;
         let user = JSON.parse(localStorage.getItem('jijaUser')) || { name: "Guest", phone: "0000000000" };
-        let currentCat = 'all';
-        let currentSub = 'all';
+        let currentCat = 'all', currentSub = 'all';
 
         const SIZES = {
             cloth: ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "Free Size"],
@@ -235,7 +224,6 @@
                 if(!appData.products) appData.products=[];
                 if(!appData.reviews) appData.reviews=[];
                 if(!appData.catBanners) appData.catBanners=[];
-                // Ensure subCategories is an object
                 if (Array.isArray(appData.subCategories)) {
                     appData.subCategories = { cloth: appData.subCategories, kids: ["Boys"], footwear: ["Shoes"], jewelry: ["Necklace"], toy: ["Cars"] };
                 }
@@ -246,8 +234,7 @@
 
         function startThemeAnimations() {
             let t = localStorage.getItem('jijaTheme') || 'default';
-            if(t==='auto') t = 'default'; // Simplified auto logic for demo
-            
+            if(t==='auto') t = 'default';
             let symbols = [];
             if(t === 'christmas') symbols = ['❄️', '⛄', '🎄'];
             else if(t === 'diwali') symbols = ['🪔', '✨', '🎆'];
@@ -299,18 +286,13 @@
 
         function applyFilters() {
             let list = appData.products || [];
-            
-            // Search
             const q = document.getElementById('searchBox').value.toLowerCase();
+            
             if(q) list = list.filter(p => p.name.toLowerCase().includes(q));
-            
-            // Main Category
             if(currentCat!=='all') list = list.filter(p => p.cat === currentCat);
-            
-            // Sub-Category
             if(currentSub!=='all') list = list.filter(p => p.subCats && p.subCats.includes(currentSub));
 
-            // Budget Filter
+            // Budget
             const budget = document.getElementById('budgetFilter').value;
             if(budget !== 'all') {
                 list = list.filter(p => {
@@ -323,13 +305,13 @@
                 });
             }
 
-            // Size Filter
+            // Size
             const sizeVal = document.getElementById('sizeFilter').value;
             if(sizeVal !== 'all' && document.getElementById('sizeFilter').style.display !== 'none') {
                 list = list.filter(p => p.stock && p.stock[sizeVal] > 0);
             }
 
-            // Sort
+            // Rank Sorting
             const sort = document.getElementById('sortSelect').value;
             if(sort === 'low') list.sort((a,b) => a.price - b.price);
             else if(sort === 'high') list.sort((a,b) => b.price - a.price);
@@ -346,7 +328,7 @@
 
         function setCat(cat, btn) {
             currentCat = cat;
-            currentSub = 'all'; // Reset Sub
+            currentSub = 'all';
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
@@ -430,58 +412,62 @@
             document.getElementById('cartModal').style.display='flex';
         }
 
-        function openPayment() {
-            if(cart.length === 0) return;
+        function openCheckout() {
+            if(cart.length === 0) return alert("Cart empty");
             document.getElementById('cartModal').style.display = 'none';
             document.getElementById('checkoutModal').style.display = 'flex';
         }
 
-        function moveToPay() {
+        async function placeOrder() {
             const addr = document.getElementById('coAddr').value;
-            if(!addr) return alert("Enter address");
-            document.getElementById('checkoutModal').style.display = 'none';
+            if(!addr) return alert("Please fill address details");
             
-            const amt = document.getElementById('cartTotal').innerText;
-            document.getElementById('payAmount').innerText = amt;
+            document.getElementById('loader').style.display = 'flex'; // Show loading
+
+            // 1. Get FRESH Data (Prevents stock conflicts)
+            const r = await fetch(DB_URL);
+            const freshData = await r.json();
             
-            const upiLink = `upi://pay?pa=${MERCHANT_UPI}&pn=JijaStudio&am=${amt}&cu=INR`;
-            document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
-            
-            document.getElementById('payModal').style.display = 'flex';
-        }
+            // 2. Validate & Deduct
+            let valid = true;
+            cart.forEach(cItem => {
+                const dbProd = freshData.products.find(p => p.id === cItem.id);
+                if(!dbProd || dbProd.stock[cItem.size] < cItem.qty) valid = false;
+                else dbProd.stock[cItem.size] -= cItem.qty; 
+            });
 
-        function checkTxn() {
-            const val = document.getElementById('txnId').value;
-            const btn = document.getElementById('btnConfirm');
-            if(val.length > 5) { btn.disabled = false; btn.classList.remove('btn-disabled'); }
-            else { btn.disabled = true; btn.classList.add('btn-disabled'); }
-        }
+            if(!valid) {
+                document.getElementById('loader').style.display = 'none';
+                return alert("Some items went out of stock! Please refresh.");
+            }
 
-        async function confirmOrder() {
-            const txn = document.getElementById('txnId').value;
-            const total = document.getElementById('payAmount').innerText;
-            const addr = document.getElementById('coAddr').value + ", " + document.getElementById('coCity').value;
+            // 3. Update Inventory in Cloud
+            await fetch(DB_URL, { method: "PUT", body: JSON.stringify(freshData) });
 
+            // 4. Create Order Record
             const order = {
                 date: new Date().toISOString(),
                 user: user,
-                address: { city: addr },
+                address: { city: addr + ", " + document.getElementById('coCity').value },
                 cart: cart,
-                total: total,
-                txnId: txn,
+                total: document.getElementById('cartTotal').innerText,
+                txnId: "Direct-WA",
                 status: "Ordered"
             };
-
             await fetch(ORDERS_URL, { method: "POST", body: JSON.stringify(order) });
 
-            let msg = `*NEW PAID ORDER*\nUser: ${user.name}\nRef: ${txn}\nItems:\n`;
-            cart.forEach(i => msg += `- ${i.name}\n`);
+            // 5. WhatsApp
+            let msg = `*NEW ORDER*\nUser: ${user.name}\nAddress: ${order.address.city}\n\nItems:\n`;
+            cart.forEach(i => msg += `- ${i.name} (${i.size})\n`);
+            msg += `\nTotal: ₹${order.total}`;
+            
             window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)}`);
-
+            
             cart = [];
             document.getElementById('cCount').innerText = "0";
-            document.getElementById('payModal').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
             alert("Order Placed Successfully!");
+            location.reload();
         }
 
         async function openMyOrders() {
@@ -499,7 +485,7 @@
                 list.innerHTML += `
                 <div class="track-item">
                     <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                        <span>Ref: ${o.txnId.substring(0,6)}</span><span>₹${o.total}</span>
+                        <span>Order Date: ${new Date(o.date).toLocaleDateString()}</span><span>₹${o.total}</span>
                     </div>
                     <div class="track-status">Status: ${s}</div>
                     <div class="track-progress">
