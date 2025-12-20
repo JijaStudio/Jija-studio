@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jija Admin - Live Inventory</title>
+    <title>Jija Admin - Inventory Manager</title>
     <style>
         :root { --primary: #D81B60; --dark: #2c3e50; --edit: #f39c12; --green: #27ae60; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; display: flex; }
@@ -48,7 +48,7 @@
 
 <div class="sidebar">
     <h2>Jija Admin</h2>
-    <p style="font-size:12px; color:#aaa;">Cloud Inventory Manager</p>
+    <p style="font-size:12px; color:#aaa;">Inventory & Pricing</p>
     <a href="#" style="color:white; text-decoration:none; display:block; margin-top:20px;">Dashboard</a>
     <button onclick="clearAllData()" style="background:red; font-size:12px; margin-top:50px; width:100%;">Reset All Data</button>
 </div>
@@ -170,7 +170,7 @@
     // --- 🎨 THEME LOGIC ---
     function saveTheme() {
       localStorage.setItem('jijaTheme', document.getElementById('themeSelect').value);
-      alert("Theme saved locally (for preview).");
+      alert("Theme saved!");
     }
 
     // --- 🛍️ INVENTORY LOGIC ---
@@ -192,24 +192,29 @@
     const FOOTWEAR_SIZES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
     window.onload = function() {
+        // Check Login
         if (sessionStorage.getItem('adminLogged') === 'yes') {
             document.getElementById('adminLogin').style.display = 'none';
         }
-        
-        // Initial Local Load (will be overwritten by Firebase shortly)
+
+        // Load Theme
+        const savedTheme = localStorage.getItem('jijaTheme');
+        if(savedTheme) document.getElementById('themeSelect').value = savedTheme;
+
+        // Load Data
         const stored = localStorage.getItem('jijaData');
         if (stored) {
             let parsed = JSON.parse(stored);
             if(Array.isArray(parsed.subCategories)) parsed.subCategories = appData.subCategories;
+            if(!parsed.subCategories.footwear) parsed.subCategories.footwear = ["Shoes", "Sandals"];
             appData = parsed;
         }
         renderManageSubCats(); toggleCategoryLogic(); renderTable();
     };
 
-    // Standard saveData (overwritten by Firebase below)
     function saveData() { localStorage.setItem('jijaData', JSON.stringify(appData)); }
 
-    // --- HELPER FUNCTIONS ---
+    // SUB CATS
     function renderManageSubCats() {
         const main = document.getElementById('manageCatSelect').value;
         const list = appData.subCategories[main] || [];
@@ -222,12 +227,14 @@
     }
     function removeSubCat(main, sub) { if(confirm("Remove "+sub+"?")) { appData.subCategories[main] = appData.subCategories[main].filter(c => c !== sub); saveData(); renderManageSubCats(); } }
 
+    // FORM LOGIC
     function updateProductSubCatDropdown(mainCat) {
         const list = appData.subCategories[mainCat] || [];
         document.getElementById('pSubCat').innerHTML = '<option value="">Select Sub-Type</option>' + list.map(c=>`<option value="${c}">${c}</option>`).join('');
     }
     function toggleCategoryLogic() {
         const cat = document.getElementById('pCat').value; updateProductSubCatDropdown(cat);
+        // Show Stock Grid for Cloth, Kids, Jewelry AND Footwear
         if(cat === 'cloth' || cat === 'kids' || cat === 'jewelry' || cat === 'footwear') {
             document.getElementById('stockSection').style.display = 'block'; document.getElementById('simpleStockOption').style.display = 'none';
             renderStockInputs(cat);
@@ -239,6 +246,7 @@
         if(!cat) cat = document.getElementById('pCat').value;
         const subCat = document.getElementById('pSubCat').value.toLowerCase();
         const container = document.getElementById('stockContainer'); container.innerHTML = "";
+        
         let sizes = [];
         if (cat === 'footwear') sizes = FOOTWEAR_SIZES;
         else if (cat === 'kids') sizes = KIDS_SIZES;
@@ -246,18 +254,22 @@
         else if (cat === 'jewelry') sizes = ["Free Size"];
         else if (cat === 'cloth') sizes = ADULT_SIZES;
         else sizes = ["General"];
+
         sizes.forEach(size => { container.innerHTML += `<div class="stock-item"><label>${size}</label><input type="number" class="size-input" data-label="${size}" placeholder="0"></div>`; });
     }
 
+    // SUBMIT
     function handleFormSubmit() {
         const name = document.getElementById('pName').value;
         const price = document.getElementById('pPrice').value;
         const mrp = document.getElementById('pMRP').value;
+
         if(!name || !price || !mrp) return alert("Name, Selling Price & MRP are required");
         if(parseFloat(price) > parseFloat(mrp)) return alert("Selling Price cannot be higher than MRP");
 
         const cat = document.getElementById('pCat').value;
         let stockData = {};
+        
         if(document.getElementById('stockSection').style.display !== 'none') {
             document.querySelectorAll('.size-input').forEach(inp => { stockData[inp.getAttribute('data-label')] = parseInt(inp.value) || 0; });
         } else {
@@ -285,6 +297,7 @@
         saveData(); renderTable();
     }
 
+    // EDIT
     function editProduct(id) {
         const p = appData.products.find(prod => prod.id === id); if(!p) return;
         editingId = id; 
@@ -298,6 +311,7 @@
 
         toggleCategoryLogic(); document.getElementById('pSubCat').value = p.subCat;
         renderStockInputs(p.cat);
+        
         setTimeout(() => {
             if(document.getElementById('stockSection').style.display !== 'none') {
                 document.querySelectorAll('.size-input').forEach(inp => {
@@ -337,7 +351,7 @@
                 else stockDisplay += `<span class="stock-badge stock-zero">${key}: 0</span>`;
             }
             tbody.innerHTML += `<tr style="border-bottom:1px solid #ddd;">
-                <td><img src="${p.img}" class="img-preview"></td>
+                <td><img src="${p.img}" style="width:50px; height:50px; object-fit:cover;"></td>
                 <td><b>${p.name}</b> ${bannerBadge}<br><small style="color:#666;">${p.cat} > ${p.subCat}</small></td>
                 <td><s style="color:#999">₹${p.mrp||'-'}</s> <b>₹${p.price}</b></td>
                 <td><div style="max-width:250px; line-height:1.4;">${stockDisplay || '<span style="color:red">Out of Stock</span>'}</div></td>
@@ -347,10 +361,10 @@
     }
     function clearAllData() { if(confirm("RESET ALL?")) { localStorage.removeItem('jijaData'); location.reload(); } }
 </script>
-
+<!-- Firebase -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBCGqrmKpymeBVmVMkGeHTCIarfWngSyFs",
@@ -371,7 +385,6 @@ window.saveData = async function () {
     console.log("Saved to Firebase");
   } catch (e) {
     console.error("Firebase save error", e);
-    alert("Error saving to Cloud. Check console.");
   }
 };
 
@@ -384,7 +397,6 @@ window.addEventListener("load", async () => {
       renderManageSubCats();
       toggleCategoryLogic();
       renderTable();
-      console.log("Loaded from Firebase");
     }
   } catch (e) {
     console.error("Firebase load error", e);
