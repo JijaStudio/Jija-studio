@@ -25,16 +25,42 @@
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box; }
         .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
         .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--red); color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+
+        /* STOCK GRID */
+        .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
+        .stk-box { background: #f8fafc; padding: 5px; border: 1px solid #cbd5e1; border-radius: 5px; text-align: center; }
+        .stk-box label { font-size: 0.75rem; display: block; font-weight: 600; margin-bottom: 3px; }
+        .stk-box input { margin: 0; text-align: center; font-weight: 700; }
+
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size:0.9rem; }
+        th { text-align: left; padding: 12px; background: #f1f5f9; color: #64748b; font-weight: 600; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        .thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0; }
         
+        /* STATUS & TAGS */
+        .status-select { padding: 5px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+        .status-Ordered { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+        .status-Shipped { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
+        .status-Delivered { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        
+        .stock-tag { display: inline-block; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin: 2px; border: 1px solid #e2e8f0; background: #f8fafc; }
+        .stock-tag.low { color: var(--red); border-color: #fca5a5; background: #fef2f2; }
+        .stock-tag.ok { color: var(--green); border-color: #86efac; background: #f0fdf4; }
+
+        .sub-tag { background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; margin: 3px; border: 1px solid #cbd5e1; }
+        .sub-tag i { color: var(--red); cursor: pointer; }
+
         /* THEME CARDS */
         .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
         .theme-option { border: 2px solid #e2e8f0; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .theme-option:hover { border-color: var(--primary); background: #fff0f5; }
         .theme-option.active { border-color: var(--primary); background: var(--primary); color: white; }
-        .theme-icon { font-size: 2rem; margin-bottom: 5px; }
 
         .section { display: none; }
         .section.active { display: block; }
+        .editing-mode { border: 2px solid var(--edit); background-color: #fffbeb; }
         
         #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 999; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
@@ -52,9 +78,10 @@
     </div>
     
     <div class="nav-item active" onclick="showSection('orderSection', this)"><i class="ri-shopping-bag-3-line"></i> Order Manager</div>
-    <div class="nav-item" onclick="showSection('catSection', this)"><i class="ri-layout-grid-line"></i> Manage Categories</div>
-    <div class="nav-item" onclick="showSection('prodSection', this)"><i class="ri-add-circle-line"></i> Products</div>
-    <div class="nav-item" onclick="showSection('settingSection', this)"><i class="ri-magic-line"></i> Theme & Animations</div>
+    <div class="nav-item" onclick="showSection('prodSection', this)"><i class="ri-add-circle-line"></i> Products (Add/Edit)</div>
+    <div class="nav-item" onclick="showSection('catSection', this)"><i class="ri-layout-grid-line"></i> Categories & Ads</div>
+    <div class="nav-item" onclick="showSection('invSection', this)"><i class="ri-list-check"></i> Inventory List</div>
+    <div class="nav-item" onclick="showSection('settingSection', this)"><i class="ri-magic-line"></i> Theme Settings</div>
 </div>
 
 <div class="main">
@@ -63,61 +90,154 @@
         <div class="card">
             <div class="card-header">
                 <span>Customer Orders</span>
-                <button class="btn btn-primary" onclick="loadData()">Refresh</button>
+                <button class="btn btn-primary" onclick="loadData()"><i class="ri-refresh-line"></i> Refresh</button>
             </div>
-            <div style="padding:20px; text-align:center; color:#888;">Order Module (Same as previous code)</div>
+            <div style="overflow-x:auto;">
+                <table id="orderTable">
+                    <thead><tr><th>Date</th><th>Customer</th><th>Bill Details</th><th>Status</th></tr></thead>
+                    <tbody id="orderList"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="prodSection" class="section">
+        <div class="card" id="productForm">
+            <div class="card-header">
+                <span id="formTitle">Add New Product</span> 
+                <button class="btn btn-danger" id="cancelEdit" style="display:none;" onclick="resetForm()">Cancel Edit</button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <input id="pName" placeholder="Product Name">
+                    
+                    <label style="font-size:0.8rem; font-weight:bold; color:#64748b;">Main Category</label>
+                    <select id="pCat" onchange="renderSubSelect()">
+                        <option value="cloth">Adult Fashion</option>
+                        <option value="kids">Kids Wear</option>
+                        <option value="footwear">Footwear</option>
+                        <option value="jewelry">Jewelry</option>
+                        <option value="toy">Toy</option>
+                    </select>
+
+                    <label style="font-size:0.8rem; font-weight:bold; color:#64748b; margin-top:10px; display:block;">Sub-Category</label>
+                    <select id="pSubCat">
+                        <option value="">Select Option...</option>
+                    </select>
+                </div>
+                <div>
+                    <input id="pPrice" type="number" placeholder="Selling Price">
+                    <input id="pMrp" type="number" placeholder="MRP">
+                    <input id="pBadge" placeholder="Badge URL (e.g. Sale)">
+                    <div style="display:flex; align-items:center; gap:10px; background:#f0fdf4; padding:5px; border-radius:5px;">
+                        <label style="margin:0; font-size:0.8rem; font-weight:600; color:#15803d;">Page Rank (1=Top):</label>
+                        <input id="pRank" type="number" value="100" style="margin:0; width:70px;">
+                    </div>
+                </div>
+            </div>
+            
+            <input id="pImg" placeholder="Main Image URL">
+            <div style="display:flex; gap:10px;">
+                <input id="pImg2" placeholder="Image 2 URL">
+                <input id="pImg3" placeholder="Image 3 URL">
+            </div>
+            <input id="pVideo" placeholder="YouTube Video URL">
+            <textarea id="pDesc" rows="2" placeholder="Description..."></textarea>
+            
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+                <input type="checkbox" id="pBanner" style="width:auto; margin:0;">
+                <label for="pBanner" style="margin:0;">Promote in Home Slider?</label>
+            </div>
+
+            <div style="background:#f0fdf4; padding:15px; border-radius:8px; border:1px dashed var(--green);">
+                <label style="font-weight:600; color:#15803d;"><i class="ri-stack-line"></i> Manage Inventory Stock</label>
+                <div id="stockGrid" class="stock-grid"></div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveProduct()" style="margin-top:20px; width:100%;" id="saveBtn">Save Product</button>
+        </div>
+    </div>
+
+    <div id="catSection" class="section">
+        <div class="card">
+            <div class="card-header">Add New Sub-Category</div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="manageCat" style="width: 200px;" onchange="renderManageTags()">
+                    <option value="cloth">Adult Fashion</option>
+                    <option value="kids">Kids Wear</option>
+                    <option value="footwear">Footwear</option>
+                    <option value="jewelry">Jewelry</option>
+                    <option value="toy">Toy</option>
+                </select>
+                <input id="newSubName" placeholder="New Name (e.g. Lehenga)" style="flex:1; margin-bottom:0;">
+                <button class="btn btn-primary" onclick="addNewSubCategory()">Add</button>
+            </div>
+            <div style="margin-top:20px;">
+                <label style="font-weight:600; color:#64748b;">Active Sub-Categories:</label>
+                <div id="activeSubTags" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Category Ads / Banners</div>
+            <div style="display: flex; gap: 10px;">
+                <select id="banCat" style="width: 150px;"><option value="">Link To...</option></select>
+                <select id="banType" style="width: 100px;"><option value="img">Image</option><option value="vid">Video</option></select>
+                <input id="banMedia" placeholder="Media URL" style="flex:1;">
+                <button class="btn btn-primary" onclick="addCategoryBanner()">Add Ad</button>
+            </div>
+            <div id="bannerGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:10px; margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <div id="invSection" class="section">
+        <div class="card">
+            <div class="card-header">Current Inventory</div>
+            <div style="overflow-x:auto;">
+                <table><thead><tr><th width="60">Img</th><th>Product</th><th>Rank</th><th>Stock</th><th>Actions</th></tr></thead><tbody id="tableBody"></tbody></table>
+            </div>
         </div>
     </div>
 
     <div id="settingSection" class="section">
         <div class="card">
-            <div class="card-header">Website Festival Theme & Animations</div>
-            <p style="color:#64748b; margin-bottom:20px;">Select a theme to apply colors and floating animations to the customer website instantly.</p>
-            
+            <div class="card-header">Website Festival Theme</div>
+            <p style="color:#64748b; margin-bottom:20px;">Select a theme to apply colors and floating animations instantly.</p>
             <div class="theme-grid">
-                <div class="theme-option" onclick="setTheme('default', this)">
-                    <div class="theme-icon">🌸</div>
-                    <div>Default</div>
-                </div>
-                <div class="theme-option" onclick="setTheme('diwali', this)">
-                    <div class="theme-icon">🪔</div>
-                    <div>Diwali</div>
-                </div>
-                <div class="theme-option" onclick="setTheme('christmas', this)">
-                    <div class="theme-icon">🎄</div>
-                    <div>Christmas</div>
-                </div>
-                <div class="theme-option" onclick="setTheme('newyear', this)">
-                    <div class="theme-icon">🎆</div>
-                    <div>New Year</div>
-                </div>
-                <div class="theme-option" onclick="setTheme('holi', this)">
-                    <div class="theme-icon">🎨</div>
-                    <div>Holi</div>
-                </div>
-                <div class="theme-option" onclick="setTheme('valentine', this)">
-                    <div class="theme-icon">💖</div>
-                    <div>Valentine</div>
-                </div>
-                <div class="theme-option" onclick="setTheme('eid', this)">
-                    <div class="theme-icon">🌙</div>
-                    <div>Eid</div>
-                </div>
+                <div class="theme-option" onclick="setTheme('default', this)">🌸 Default</div>
+                <div class="theme-option" onclick="setTheme('diwali', this)">🪔 Diwali</div>
+                <div class="theme-option" onclick="setTheme('christmas', this)">🎄 Christmas</div>
+                <div class="theme-option" onclick="setTheme('newyear', this)">🎆 New Year</div>
+                <div class="theme-option" onclick="setTheme('holi', this)">🎨 Holi</div>
+                <div class="theme-option" onclick="setTheme('valentine', this)">💖 Valentine</div>
+                <div class="theme-option" onclick="setTheme('eid', this)">🌙 Eid</div>
             </div>
-            
-            <button class="btn btn-primary" style="margin-top:20px; width:100%;" onclick="saveSettings()">Save Theme Settings</button>
+            <button class="btn btn-primary" style="margin-top:20px; width:100%;" onclick="saveSettings()">Save Theme</button>
         </div>
     </div>
-
-    <div id="catSection" class="section"><div class="card">Category Manager (Use previous code)</div></div>
-    <div id="prodSection" class="section"><div class="card">Product Manager (Use previous code)</div></div>
 
 </div>
 
 <script>
     const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
+    const ORDERS_URL = "https://jija-studio-default-rtdb.firebaseio.com/orders.json";
     
-    let appData = { settings: { theme: 'default' } }; // Default
+    let appData = { 
+        products: [], 
+        catBanners: [], 
+        subCategories: { cloth: ["Saree", "Kurti"], kids: ["Boys", "Girls"], footwear: ["Shoes"], jewelry: ["Necklace"], toy: ["Cars"] },
+        settings: { theme: 'default' }
+    };
+    let ordersData = {};
+    let editId = null;
+
+    const SIZES = {
+        cloth: ["S","M","L","XL","XXL","Free Size"],
+        kids: ["0-1Y","1-2Y","2-3Y","3-4Y","4-5Y","5-6Y"],
+        footwear: [1,2,3,4,5,6,7,8,9,10],
+        jewelry: ["2-2","2-4","2-6","2-8","Free Size"]
+    };
 
     window.onload = loadData;
 
@@ -126,36 +246,127 @@
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
+        if(id === 'catSection') { renderManageTags(); renderBanners(); }
+        if(id === 'invSection') renderTable();
     }
 
     async function loadData() {
         document.getElementById('loader').style.display = 'flex';
         try {
-            const r = await fetch(DB_URL);
-            const d = await r.json();
-            if(d) appData = d;
-            if(!appData.settings) appData.settings = { theme: 'default' };
-            
-            // Highlight active theme
-            const active = document.querySelector(`.theme-option[onclick*="'${appData.settings.theme}'"]`);
-            if(active) setTheme(appData.settings.theme, active);
+            const r1 = await fetch(DB_URL);
+            const d1 = await r1.json();
+            if(d1) {
+                appData = d1;
+                if(!appData.products) appData.products = [];
+                if(!appData.catBanners) appData.catBanners = [];
+                if(!appData.subCategories) appData.subCategories = {};
+                if(!appData.settings) appData.settings = { theme: 'default' };
+                
+                // Set Theme Active
+                const activeTheme = document.querySelector(`.theme-option[onclick*="'${appData.settings.theme}'"]`);
+                if(activeTheme) activeTheme.classList.add('active');
+            }
 
+            const r2 = await fetch(ORDERS_URL);
+            ordersData = await r2.json() || {};
+
+            refreshUI();
         } catch(e) { console.error(e); }
         document.getElementById('loader').style.display = 'none';
     }
 
-    function setTheme(name, el) {
-        appData.settings.theme = name;
-        document.querySelectorAll('.theme-option').forEach(d => d.classList.remove('active'));
-        if(el) el.classList.add('active');
-    }
-
-    async function saveSettings() {
+    async function saveData() {
         document.getElementById('loader').style.display = 'flex';
         await fetch(DB_URL, { method: "PUT", body: JSON.stringify(appData) });
         document.getElementById('loader').style.display = 'none';
-        alert("Theme Updated! Check website.");
+        refreshUI();
     }
-</script>
-</body>
-</html>
+
+    function refreshUI() {
+        renderOrders();
+        renderSubSelect(); 
+        renderManageTags(); 
+        renderTable();
+        renderBanners();
+    }
+
+    // --- PRODUCT LOGIC ---
+    function renderSubSelect() {
+        const cat = document.getElementById('pCat').value;
+        const subs = appData.subCategories[cat] || [];
+        const drop = document.getElementById('pSubCat');
+        drop.innerHTML = '<option value="">Select Option</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
+        
+        let allSubs = [];
+        for(let k in appData.subCategories) allSubs = [...allSubs, ...appData.subCategories[k]];
+        document.getElementById('banCat').innerHTML = '<option value="">Link To...</option>' + allSubs.map(s => `<option value="${s}">${s}</option>`).join('');
+        
+        renderStockInputs(cat);
+    }
+
+    function renderStockInputs(cat) {
+        const div = document.getElementById('stockGrid');
+        const sizes = SIZES[cat] || ["General"];
+        div.innerHTML = sizes.map(s => `<div class="stk-box"><label>${s}</label><input type="number" class="stk-in" data-s="${s}" value="0"></div>`).join('');
+    }
+
+    function saveProduct() {
+        const name = document.getElementById('pName').value;
+        const sub = document.getElementById('pSubCat').value;
+        if(!name || !sub) return alert("Name and Sub-Category required");
+        
+        let stock = {};
+        document.querySelectorAll('.stk-in').forEach(i => stock[i.dataset.s] = parseInt(i.value)||0);
+
+        const prod = {
+            id: editId || Date.now(),
+            name,
+            cat: document.getElementById('pCat').value,
+            subCats: [sub], 
+            price: document.getElementById('pPrice').value,
+            mrp: document.getElementById('pMrp').value,
+            badge: document.getElementById('pBadge').value,
+            rank: parseInt(document.getElementById('pRank').value) || 100,
+            img: document.getElementById('pImg').value,
+            img2: document.getElementById('pImg2').value,
+            img3: document.getElementById('pImg3').value,
+            video: document.getElementById('pVideo').value,
+            desc: document.getElementById('pDesc').value,
+            isBanner: document.getElementById('pBanner').checked,
+            stock
+        };
+
+        if(editId) {
+            const idx = appData.products.findIndex(p => p.id === editId);
+            appData.products[idx] = prod;
+        } else {
+            appData.products.push(prod);
+        }
+        saveData();
+        resetForm();
+    }
+
+    function startEdit(id) {
+        const p = appData.products.find(x => x.id === id);
+        if(!p) return;
+        editId = id;
+        showSection('prodSection', document.querySelectorAll('.nav-item')[1]);
+        
+        document.getElementById('formTitle').innerText = "Edit Product: " + p.name;
+        document.getElementById('saveBtn').innerText = "Update Product";
+        document.getElementById('cancelEdit').style.display = 'block';
+
+        document.getElementById('pName').value = p.name;
+        document.getElementById('pCat').value = p.cat;
+        document.getElementById('pPrice').value = p.price;
+        document.getElementById('pMrp').value = p.mrp || "";
+        document.getElementById('pBadge').value = p.badge || "";
+        document.getElementById('pRank').value = p.rank || 100;
+        document.getElementById('pImg').value = p.img;
+        document.getElementById('pImg2').value = p.img2 || "";
+        document.getElementById('pImg3').value = p.img3 || "";
+        document.getElementById('pVideo').value = p.video || "";
+        document.getElementById('pDesc').value = p.desc || "";
+        document.getElementById('pBanner').checked = p.isBanner;
+
+        render
