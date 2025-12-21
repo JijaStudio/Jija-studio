@@ -62,7 +62,7 @@
         .modal-box { background: white; width: 90%; max-width: 500px; max-height: 90vh; border-radius: 15px; overflow-y: auto; position: relative; padding: 25px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .btn-full { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; border-radius: 8px; margin-top: 10px; }
 
-        /* LOGIN MODAL SPECIFIC */
+        /* LOGIN INPUTS */
         #loginModal { z-index: 9999; }
         .login-input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; box-sizing: border-box; }
         .login-input:focus { border-color: var(--primary); outline: none; }
@@ -86,7 +86,7 @@
         .theme-particle { position: fixed; top: -10%; user-select: none; pointer-events: none; z-index: 4000; animation: fall linear forwards; opacity: 0.9; }
         @keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
         
-        /* ORDER TRACKING */
+        /* TRACKING */
         .track-item { border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; }
         .track-status { font-weight: bold; color: var(--primary); margin-top: 5px; font-size: 0.9rem; }
         
@@ -98,21 +98,25 @@
 
     <div id="loginModal" class="modal" style="display: flex;">
         <div class="modal-box" style="text-align: center;">
-            <div style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"><i class="ri-shield-user-line"></i></div>
-            <h2 style="margin: 0 0 10px;">Welcome to Jija Studio</h2>
-            <p style="color: #64748b; margin-bottom: 20px;">Please login to continue shopping</p>
+            <div style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"><i class="ri-shield-check-line"></i></div>
+            <h2 style="margin: 0 0 10px;">Login to Jija Studio</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">We will send an OTP to your number</p>
             
             <div id="loginStep1">
                 <input id="loginName" class="login-input" placeholder="Your Full Name">
-                <input id="loginPhone" class="login-input" type="tel" placeholder="Mobile Number (10 digits)">
-                <button class="btn-full" onclick="requestOtp()">Get OTP</button>
+                <div style="display:flex; align-items:center; gap:5px; margin-bottom:15px;">
+                    <span style="padding:12px; background:#eee; border-radius:8px; border:1px solid #e2e8f0;">+91</span>
+                    <input id="loginPhone" class="login-input" type="tel" placeholder="Mobile Number" style="margin-bottom:0;">
+                </div>
+                <div id="recaptcha-container"></div>
+                <button class="btn-full" id="btnGetOtp" onclick="window.requestOtp()">Get OTP</button>
             </div>
 
             <div id="loginStep2" style="display: none;">
-                <p style="color: green; font-size: 0.9rem; margin-bottom: 10px;">OTP Sent! (Check Alert)</p>
-                <input id="loginOtp" class="login-input" type="number" placeholder="Enter 4-digit OTP">
-                <button class="btn-full" onclick="verifyOtp()">Verify & Login</button>
-                <div style="margin-top: 10px; font-size: 0.9rem; color: #64748b; cursor: pointer;" onclick="resendOtp()">Resend OTP</div>
+                <p style="color: green; font-size: 0.9rem; margin-bottom: 10px;">OTP Sent Successfully!</p>
+                <input id="loginOtp" class="login-input" type="number" placeholder="Enter 6-digit OTP">
+                <button class="btn-full" onclick="window.verifyOtp()">Verify & Login</button>
+                <div style="margin-top: 10px; font-size: 0.9rem; color: #64748b; cursor: pointer;" onclick="location.reload()">Change Number</div>
             </div>
         </div>
     </div>
@@ -173,7 +177,7 @@
     <div class="grid" id="grid"></div>
 
     <div id="productView" class="modal">
-        <div class="modal-box">
+        <div class="modal-box" style="height:90vh;">
             <div style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.8); border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:20;" onclick="document.getElementById('productView').style.display='none'">&times;</div>
             
             <div class="pv-gallery">
@@ -183,12 +187,26 @@
             </div>
             <div class="thumb-row" id="pvThumbs"></div>
             
+            <div id="pvVideoBox" style="display:none; padding:10px;"><iframe id="pvVideo" width="100%" height="200" frameborder="0"></iframe></div>
+
             <div style="padding:10px;">
                 <h2 id="pvTitle" style="margin:0 0 5px;"></h2>
                 <div style="font-size:1.2rem; font-weight:700; color:var(--primary);"><span id="pvPrice"></span></div>
                 <select id="pvSize" style="width:100%; padding:10px; margin-top:10px; border:1px solid #ddd; border-radius:6px;"></select>
                 <div id="pvStock" style="font-size:0.85rem; margin-top:5px; font-weight:600;"></div>
                 <p id="pvDesc" style="color:#666; font-size:0.9rem; line-height:1.5;"></p>
+            </div>
+
+            <div style="font-weight:600; margin:10px 10px 0;">You might also like</div>
+            <div class="similar-row" id="similarRow"></div>
+
+            <div class="review-box">
+                <div style="font-weight:600; margin-bottom:10px;">Reviews</div>
+                <div id="reviewList"></div>
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <input id="revText" placeholder="Write review..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                    <button onclick="addReview()" style="background:#333; color:white; border:none; border-radius:4px; padding:0 10px;">Post</button>
+                </div>
             </div>
 
             <button class="btn-full" onclick="addToCart()">ADD TO CART</button>
@@ -259,6 +277,85 @@
         </div>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // 🔥 IMPORTANT: PASTE YOUR CONFIG HERE 🔥
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        auth.languageCode = 'en';
+
+        // Setup Recaptcha
+        window.setupRecaptcha = () => {
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response) => { console.log("Recaptcha Verified"); }
+                });
+            }
+        };
+
+        // 1. Request OTP
+        window.requestOtp = () => {
+            const name = document.getElementById('loginName').value;
+            const phone = document.getElementById('loginPhone').value;
+            if(!name || phone.length !== 10) return alert("Enter valid Name and 10-digit Phone");
+
+            window.tempUserName = name; // Store name temporarily
+            window.setupRecaptcha();
+            
+            const phoneNumber = "+91" + phone;
+            const appVerifier = window.recaptchaVerifier;
+
+            document.getElementById('btnGetOtp').innerText = "Sending...";
+
+            signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+                .then((confirmationResult) => {
+                    window.confirmationResult = confirmationResult;
+                    document.getElementById('loginStep1').style.display = 'none';
+                    document.getElementById('loginStep2').style.display = 'block';
+                }).catch((error) => {
+                    console.error("SMS Error:", error);
+                    document.getElementById('btnGetOtp').innerText = "Get OTP";
+                    alert("SMS Error: " + error.message);
+                    window.recaptchaVerifier.render().then(function(widgetId) {
+                        grecaptcha.reset(widgetId);
+                    });
+                });
+        };
+
+        // 2. Verify OTP
+        window.verifyOtp = () => {
+            const code = document.getElementById('loginOtp').value;
+            if(!code) return alert("Enter OTP");
+
+            window.confirmationResult.confirm(code).then((result) => {
+                const user = result.user;
+                const userData = { 
+                    name: window.tempUserName, 
+                    phone: user.phoneNumber, 
+                    uid: user.uid 
+                };
+                localStorage.setItem('jijaUser', JSON.stringify(userData));
+                document.getElementById('loginModal').style.display = 'none';
+                alert("Login Successful! Welcome " + userData.name);
+                location.reload();
+            }).catch((error) => {
+                alert("Invalid OTP");
+            });
+        };
+    </script>
+
     <script>
         const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
         const ORDERS_URL = "https://jija-studio-default-rtdb.firebaseio.com/orders.json";
@@ -267,9 +364,8 @@
         let appData = { products: [], catBanners: [], subCategories: {}, settings: {theme:'default'} };
         let cart = [], wishlist = JSON.parse(localStorage.getItem('jijaWish')) || [];
         let curProd = null, currentImages = [], currentImgIdx = 0;
-        let user = JSON.parse(localStorage.getItem('jijaUser')); // Initially null
+        let user = JSON.parse(localStorage.getItem('jijaUser')); 
         let currentCat = 'all', currentSub = 'all';
-        let generatedOtp = null;
 
         const SIZES = {
             cloth: ["S", "M", "L", "XL", "XXL", "Free Size"],
@@ -279,89 +375,68 @@
         };
 
         window.onload = async () => {
-            // LOGIN CHECK
+            // Check Login
             if (user && user.phone) {
                 document.getElementById('loginModal').style.display = 'none';
             } else {
                 document.getElementById('loginModal').style.display = 'flex';
             }
 
+            applyTheme(); 
+            startThemeAnimations(); 
             const r = await fetch(DB_URL);
             const d = await r.json();
             if(d) {
                 appData = d;
                 if(!appData.products) appData.products=[];
+                if(!appData.reviews) appData.reviews=[];
                 if(!appData.catBanners) appData.catBanners=[];
-                if(!appData.settings) appData.settings={theme:'default'};
-                if(Array.isArray(appData.subCategories)) appData.subCategories = { cloth:appData.subCategories, kids:["Boys"], footwear:["Shoes"], jewelry:["Necklace"], toy:["Cars"] };
-                
-                applyTheme(appData.settings.theme);
+                if (Array.isArray(appData.subCategories)) {
+                    appData.subCategories = { cloth: appData.subCategories, kids: ["Boys"], footwear: ["Shoes"], jewelry: ["Necklace"], toy: ["Cars"] };
+                }
                 renderHome();
                 initSlider();
                 updateWishIcon();
             }
         };
 
-        // --- LOGIN & OTP LOGIC ---
-        function requestOtp() {
-            const name = document.getElementById('loginName').value;
-            const phone = document.getElementById('loginPhone').value;
-            
-            if(!name || phone.length !== 10) return alert("Please enter valid Name and 10-digit Phone");
-
-            // Simulate OTP Generation
-            generatedOtp = Math.floor(1000 + Math.random() * 9000);
-            alert(`[Jija Studio SMS]\nHi ${name}, your OTP is ${generatedOtp}`);
-
-            document.getElementById('loginStep1').style.display = 'none';
-            document.getElementById('loginStep2').style.display = 'block';
-        }
-
-        function verifyOtp() {
-            const input = document.getElementById('loginOtp').value;
-            if(input == generatedOtp) {
-                user = { 
-                    name: document.getElementById('loginName').value, 
-                    phone: document.getElementById('loginPhone').value 
-                };
-                localStorage.setItem('jijaUser', JSON.stringify(user));
-                document.getElementById('loginModal').style.display = 'none';
-                alert("Login Successful! Welcome.");
-            } else {
-                alert("Incorrect OTP. Try again.");
-            }
-        }
-
-        function resendOtp() {
-            alert(`[Jija Studio SMS]\nYour OTP is still ${generatedOtp}`);
-        }
+        // --- AUTHENTICATION IS NOW HANDLED BY THE MODULE SCRIPT ABOVE ---
 
         // --- ANIMATION & THEME ---
-        function applyTheme(t) {
-            const r = document.documentElement.style;
+        function startThemeAnimations() {
+            let t = localStorage.getItem('jijaTheme') || 'default';
+            if(t==='auto') t = 'default';
             let symbols = [];
-            if(t === 'diwali') { r.setProperty('--primary', '#ea580c'); symbols = ['🪔','✨']; }
-            else if(t === 'christmas') { r.setProperty('--primary', '#15803d'); symbols = ['❄️','🎄']; }
-            else if(t === 'holi') { r.setProperty('--primary', '#9333ea'); symbols = ['🟣','🟡']; }
-            else if(t === 'newyear') { r.setProperty('--primary', '#0f172a'); symbols = ['🎉','🥂']; }
-            else { r.setProperty('--primary', '#D81B60'); }
-            if(symbols.length) startRain(symbols);
-        }
+            if(t === 'christmas') symbols = ['❄️', '⛄', '🎄'];
+            else if(t === 'diwali') symbols = ['🪔', '✨', '🎆'];
+            else if(t === 'holi') symbols = ['🟣', '🟡', '🟢', '🔴'];
+            else if(t === 'valentine') symbols = ['❤️', '💖', '💌'];
+            else if(t === 'newyear') symbols = ['🎉', '🥂', '🎊'];
+            else return; 
 
-        function startRain(symbols) {
             setInterval(() => {
                 const p = document.createElement('div');
                 p.classList.add('theme-particle');
-                p.innerText = symbols[Math.floor(Math.random()*symbols.length)];
-                p.style.left = Math.random()*100 + 'vw';
-                p.style.fontSize = (Math.random()*20+15)+'px';
-                p.style.animationDuration = (Math.random()*3+4)+'s';
+                p.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                p.style.animationDuration = (Math.random() * 3 + 4) + 's'; 
                 document.body.appendChild(p);
-                setTimeout(()=>p.remove(), 7000);
-            }, 1000);
+                setTimeout(() => p.remove(), 7000);
+            }, 800); 
         }
 
-        // --- RENDER LOGIC ---
+        function applyTheme() {
+            let t = localStorage.getItem('jijaTheme') || 'default';
+            const r = document.documentElement.style;
+            if(t === 'diwali') { r.setProperty('--primary', '#ea580c'); }
+            else if(t === 'christmas') { r.setProperty('--primary', '#15803d'); }
+            else if(t === 'holi') { r.setProperty('--primary', '#9333ea'); }
+            else if(t === 'valentine') { r.setProperty('--primary', '#e11d48'); }
+            else if(t === 'newyear') { r.setProperty('--primary', '#0f172a'); }
+            else { r.setProperty('--primary', '#D81B60'); }
+        }
+
         function renderHome() {
             document.getElementById('catBanners').innerHTML = appData.catBanners.map(b => {
                 const media = b.type === 'vid' ? `<video src="${b.media}" class="cat-media" autoplay muted loop playsinline></video>` : `<img src="${b.media}" class="cat-media">`;
@@ -375,13 +450,14 @@
             const banners = appData.products.filter(p => p.isBanner);
             if(banners.length) {
                 slider.style.display = 'block';
-                slider.innerHTML = banners.map((p,i) => `<div class="slide ${i===0?'active':''}" style="opacity:${i===0?1:0}"><img src="${p.img}" onclick="openProd(${p.id})"></div>`).join('');
+                slider.innerHTML = banners.map((p,i) => `<div class="slide ${i===0?'active':''}" style="opacity:${i===0?1:0}"><img src="${p.img}" onclick="window.openProd(${p.id})"></div>`).join('');
                 let idx=0; setInterval(() => { const s=slider.querySelectorAll('.slide'); s[idx].style.opacity=0; idx=(idx+1)%s.length; s[idx].style.opacity=1; }, 4000);
             } else slider.style.display='none';
         }
 
         function applyFilters() {
             let list = appData.products || [];
+            
             const q = document.getElementById('searchBox').value.toLowerCase();
             if(q) list = list.filter(p => p.name.toLowerCase().includes(q));
             
@@ -415,13 +491,13 @@
                 <div class="card">
                     <div class="card-img-wrap">
                         ${p.badge ? `<img src="${p.badge}" class="badge-img">` : ''}
-                        <img src="${p.img}" onclick="openProd(${p.id})">
+                        <img src="${p.img}" onclick="window.openProd(${p.id})">
                         <div class="wish-icon ${isWish}" onclick="toggleWish(${p.id}, this)"><i class="ri-heart-fill"></i></div>
                     </div>
                     <div class="info">
                         <div class="title">${p.name}</div>
                         <div class="price">₹${p.price}</div>
-                        <button class="btn-add" onclick="openProd(${p.id})">View Option</button>
+                        <button class="btn-add" onclick="window.openProd(${p.id})">View Option</button>
                     </div>
                 </div>`;
             }).join('');
@@ -460,58 +536,103 @@
             applyFilters();
         }
 
-        // --- PRODUCT DETAILS & GALLERY ---
-        function openProd(id) {
-            curProd = appData.products.find(p => p.id === id);
+        // --- NEW: EXPOSE OPENPROD TO WINDOW ---
+        window.openProd = function(id) {
+            if (!appData.products) return; 
+            curProd = appData.products.find(p => p.id == id); // loose comparison for string/int IDs
             
+            if (!curProd) {
+                console.error("Product not found for ID:", id);
+                return;
+            }
+            
+            // Gather all images
             currentImages = [curProd.img];
             if(curProd.img2) currentImages.push(curProd.img2);
             if(curProd.img3) currentImages.push(curProd.img3);
             currentImgIdx = 0;
+
             updateGallery();
 
             document.getElementById('pvTitle').innerText = curProd.name;
             document.getElementById('pvPrice').innerText = '₹' + curProd.price;
             document.getElementById('pvDesc').innerText = curProd.desc || "";
             
+            // Video
+            const vBox = document.getElementById('pvVideoBox');
+            if(curProd.video && curProd.video.includes('embed')) {
+                vBox.style.display = 'block';
+                document.getElementById('pvVideo').src = curProd.video;
+            } else vBox.style.display = 'none';
+
             const sel = document.getElementById('pvSize');
             sel.innerHTML = '<option value="">Select Size</option>';
-            for(let [s, q] of Object.entries(curProd.stock)) if(q > 0) sel.innerHTML += `<option value="${s}">Size ${s}</option>`;
+            if(curProd.stock) {
+                for(let [s, q] of Object.entries(curProd.stock)) {
+                    if(q > 0) sel.innerHTML += `<option value="${s}">Size ${s}</option>`;
+                }
+            }
 
-            const sims = appData.products.filter(p => p.cat === curProd.cat && p.id !== curProd.id).slice(0,5);
-            document.getElementById('similarRow').innerHTML = sims.map(p => `<div class="sim-card" onclick="openProd(${p.id})"><img src="${p.img}"></div>`).join('');
+            // Similar
+            const sims = appData.products.filter(p => p.cat === curProd.cat && p.id != curProd.id).slice(0,5);
+            document.getElementById('similarRow').innerHTML = sims.map(p => `<div class="sim-card" onclick="window.openProd(${p.id})"><img src="${p.img}"></div>`).join('');
 
+            renderReviews();
             document.getElementById('productView').style.display = 'flex';
-        }
+        };
 
-        function updateGallery() {
+        window.updateGallery = function() {
             document.getElementById('pvImg').src = currentImages[currentImgIdx];
             document.getElementById('pvThumbs').innerHTML = currentImages.map((src, i) => 
-                `<img src="${src}" class="thumb ${i===currentImgIdx?'active':''}" onclick="setGallery(${i})">`
+                `<img src="${src}" class="thumb ${i === currentImgIdx ? 'active' : ''}" onclick="window.setGallery(${i})">`
             ).join('');
-        }
-        function changeImg(n) { currentImgIdx+=n; if(currentImgIdx>=currentImages.length)currentImgIdx=0; if(currentImgIdx<0)currentImgIdx=currentImages.length-1; updateGallery(); }
-        function setGallery(idx) { currentImgIdx=idx; updateGallery(); }
+        };
 
-        // --- CART, WISH, ORDERS ---
-        function addToCart() {
+        window.changeImg = function(n) {
+            currentImgIdx += n;
+            if(currentImgIdx >= currentImages.length) currentImgIdx = 0;
+            if(currentImgIdx < 0) currentImgIdx = currentImages.length - 1;
+            window.updateGallery();
+        };
+
+        window.setGallery = function(idx) {
+            currentImgIdx = idx;
+            window.updateGallery();
+        };
+
+        function renderReviews() {
+            const revs = appData.reviews.filter(r => r.pid === curProd.id);
+            const list = document.getElementById('reviewList');
+            list.innerHTML = revs.length ? revs.map(r => `<div class="review-item"><strong>${r.user}</strong>: ${r.text}</div>`).join('') : "<div style='color:#999;'>No reviews yet.</div>";
+        }
+
+        window.addReview = async function() {
+            const txt = document.getElementById('revText').value;
+            if(!txt) return;
+            appData.reviews.push({ pid: curProd.id, user: user.name, text: txt });
+            await fetch(DB_URL, { method: "PUT", body: JSON.stringify(appData) });
+            document.getElementById('revText').value="";
+            renderReviews();
+        };
+
+        window.addToCart = function() {
             const sz = document.getElementById('pvSize').value;
             if(!sz) return alert("Select Size");
             cart.push({...curProd, size:sz, qty:1});
             document.getElementById('cCount').innerText = cart.length;
             document.getElementById('productView').style.display='none';
             alert("Added!");
-        }
+        };
 
-        function toggleWish(id, el) {
+        window.toggleWish = function(id, el) {
             if(wishlist.includes(id)) { wishlist=wishlist.filter(i=>i!==id); el.classList.remove('active'); }
             else { wishlist.push(id); el.classList.add('active'); }
             localStorage.setItem('jijaWish', JSON.stringify(wishlist));
             updateWishIcon();
-        }
-        function updateWishIcon() { document.getElementById('wCount').innerText = wishlist.length; }
+        };
+        window.updateWishIcon = function() { document.getElementById('wCount').innerText = wishlist.length; };
         
-        function openWishlist() {
+        window.openWishlist = function() {
             const list = document.getElementById('wishListContainer');
             if(!wishlist.length) list.innerHTML = "<p>Empty</p>";
             else list.innerHTML = wishlist.map(id => {
@@ -519,23 +640,23 @@
                 return p ? `<div style="display:flex; gap:10px; margin-bottom:10px;"><img src="${p.img}" style="width:50px;"><div><b>${p.name}</b><br>₹${p.price}</div></div>` : '';
             }).join('');
             document.getElementById('wishModal').style.display = 'flex';
-        }
+        };
 
-        function openCart() {
+        window.openCart = function() {
             const list = document.getElementById('cartList');
             let total = 0;
             list.innerHTML = cart.map(i => { total+=parseInt(i.price); return `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${i.name} (${i.size})</span><b>₹${i.price}</b></div>`; }).join('');
             document.getElementById('cartTotal').innerText = total;
             document.getElementById('cartModal').style.display='flex';
-        }
+        };
 
-        function openCheckout() {
+        window.openCheckout = function() {
             if(cart.length === 0) return alert("Cart empty");
             document.getElementById('cartModal').style.display = 'none';
             document.getElementById('checkoutModal').style.display = 'flex';
-        }
+        };
 
-        async function placeOrder() {
+        window.placeOrder = async function() {
             const state = document.getElementById('addrState').value;
             const dist = document.getElementById('addrDist').value;
             const taluka = document.getElementById('addrTaluka').value;
@@ -568,9 +689,9 @@
             document.getElementById('cCount').innerText = 0;
             document.getElementById('checkoutModal').style.display = 'none';
             alert("Order Placed!");
-        }
+        };
 
-        async function openMyOrders() {
+        window.openMyOrders = async function() {
             const r = await fetch(ORDERS_URL);
             const d = await r.json();
             const list = document.getElementById('myOrdersList');
@@ -587,7 +708,7 @@
                 </div>`;
             });
             document.getElementById('ordersModal').style.display = 'flex';
-        }
+        };
     </script>
 </body>
 </html>
