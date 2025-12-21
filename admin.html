@@ -28,6 +28,10 @@
         .btn-danger { background: var(--red); color: white; }
         .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
 
+        /* TAGS FOR SUB-CATS */
+        .sub-tag { background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; margin: 3px; border: 1px solid #cbd5e1; }
+        .sub-tag i { color: var(--red); cursor: pointer; }
+
         /* STOCK GRID */
         .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
         .stk-box { background: #f8fafc; padding: 5px; border: 1px solid #cbd5e1; border-radius: 5px; text-align: center; }
@@ -40,7 +44,6 @@
         td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
         .thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0; }
         
-        /* STATUS & TAGS */
         .status-select { padding: 5px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
         .status-Ordered { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
         .status-Shipped { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
@@ -49,9 +52,6 @@
         .stock-tag { display: inline-block; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin: 2px; border: 1px solid #e2e8f0; background: #f8fafc; }
         .stock-tag.low { color: var(--red); border-color: #fca5a5; background: #fef2f2; }
         .stock-tag.ok { color: var(--green); border-color: #86efac; background: #f0fdf4; }
-
-        .sub-tag { background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; margin: 3px; border: 1px solid #cbd5e1; }
-        .sub-tag i { color: var(--red); cursor: pointer; }
 
         /* THEME CARDS */
         .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
@@ -203,7 +203,6 @@
     <div id="settingSection" class="section">
         <div class="card">
             <div class="card-header">Website Festival Theme</div>
-            <p style="color:#64748b; margin-bottom:20px;">Select a theme to apply colors and floating animations instantly.</p>
             <div class="theme-grid">
                 <div class="theme-option" onclick="setTheme('default', this)">🌸 Default</div>
                 <div class="theme-option" onclick="setTheme('diwali', this)">🪔 Diwali</div>
@@ -223,6 +222,7 @@
     const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
     const ORDERS_URL = "https://jija-studio-default-rtdb.firebaseio.com/orders.json";
     
+    // Default Data Structure
     let appData = { 
         products: [], 
         catBanners: [], 
@@ -246,6 +246,8 @@
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
+        // Re-render specific sections on click to ensure fresh data
+        if(id === 'prodSection') renderSubSelect();
         if(id === 'catSection') { renderManageTags(); renderBanners(); }
         if(id === 'invSection') renderTable();
     }
@@ -259,19 +261,24 @@
                 appData = d1;
                 if(!appData.products) appData.products = [];
                 if(!appData.catBanners) appData.catBanners = [];
-                if(!appData.subCategories) appData.subCategories = {};
+                // Fix for old data structure if subCategories was an array or undefined
+                if(!appData.subCategories || Array.isArray(appData.subCategories)) {
+                    appData.subCategories = { 
+                        cloth: ["Saree", "Kurti"], 
+                        kids: ["Boys", "Girls"], 
+                        footwear: ["Shoes"], 
+                        jewelry: ["Necklace"], 
+                        toy: ["Cars"] 
+                    };
+                }
                 if(!appData.settings) appData.settings = { theme: 'default' };
-                
-                // Set Theme Active
-                const activeTheme = document.querySelector(`.theme-option[onclick*="'${appData.settings.theme}'"]`);
-                if(activeTheme) activeTheme.classList.add('active');
             }
 
             const r2 = await fetch(ORDERS_URL);
             ordersData = await r2.json() || {};
 
             refreshUI();
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error(e); alert("Network Error"); }
         document.getElementById('loader').style.display = 'none';
     }
 
@@ -295,8 +302,13 @@
         const cat = document.getElementById('pCat').value;
         const subs = appData.subCategories[cat] || [];
         const drop = document.getElementById('pSubCat');
+        
+        // Safety Check: Ensure subCategories is an object
+        if(Array.isArray(appData.subCategories)) { appData.subCategories = { cloth: ["Saree"], kids: ["Boys"] }; }
+
         drop.innerHTML = '<option value="">Select Option</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
         
+        // Update Banner Dropdown too
         let allSubs = [];
         for(let k in appData.subCategories) allSubs = [...allSubs, ...appData.subCategories[k]];
         document.getElementById('banCat').innerHTML = '<option value="">Link To...</option>' + allSubs.map(s => `<option value="${s}">${s}</option>`).join('');
@@ -313,7 +325,9 @@
     function saveProduct() {
         const name = document.getElementById('pName').value;
         const sub = document.getElementById('pSubCat').value;
-        if(!name || !sub) return alert("Name and Sub-Category required");
+        
+        if(!name) return alert("Product Name is required");
+        if(!sub) return alert("Please select a Sub-Category");
         
         let stock = {};
         document.querySelectorAll('.stk-in').forEach(i => stock[i.dataset.s] = parseInt(i.value)||0);
@@ -339,8 +353,10 @@
         if(editId) {
             const idx = appData.products.findIndex(p => p.id === editId);
             appData.products[idx] = prod;
+            alert("Product Updated!");
         } else {
             appData.products.push(prod);
+            alert("Product Added!");
         }
         saveData();
         resetForm();
@@ -350,7 +366,7 @@
         const p = appData.products.find(x => x.id === id);
         if(!p) return;
         editId = id;
-        showSection('prodSection', document.querySelectorAll('.nav-item')[1]);
+        showSection('prodSection', document.querySelectorAll('.nav-item')[1]); // Ensure correct tab
         
         document.getElementById('formTitle').innerText = "Edit Product: " + p.name;
         document.getElementById('saveBtn').innerText = "Update Product";
@@ -369,4 +385,99 @@
         document.getElementById('pDesc').value = p.desc || "";
         document.getElementById('pBanner').checked = p.isBanner;
 
-        render
+        renderSubSelect(); 
+        if(p.subCats && p.subCats.length > 0) document.getElementById('pSubCat').value = p.subCats[0];
+
+        setTimeout(() => {
+            document.querySelectorAll('.stk-in').forEach(i => {
+                if(p.stock[i.dataset.s] !== undefined) i.value = p.stock[i.dataset.s];
+            });
+        }, 50);
+    }
+
+    function resetForm() {
+        editId = null;
+        document.querySelectorAll('input, textarea').forEach(i => i.value='');
+        document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked=false);
+        document.getElementById('pRank').value = 100;
+        document.getElementById('formTitle').innerText = "Add New Product";
+        document.getElementById('saveBtn').innerText = "Save Product";
+        document.getElementById('cancelEdit').style.display = "none";
+        renderSubSelect();
+    }
+
+    function deleteProd(id) {
+        if(confirm("Delete this product?")) {
+            appData.products = appData.products.filter(p => p.id !== id);
+            saveData();
+        }
+    }
+
+    // --- MANAGE CATS ---
+    function renderManageTags() {
+        const cat = document.getElementById('manageCat').value;
+        const subs = appData.subCategories[cat] || [];
+        document.getElementById('activeSubTags').innerHTML = subs.map(s => `<div class="sub-tag">${s} <i class="ri-close-circle-fill" onclick="removeSubCat('${cat}', '${s}')"></i></div>`).join('');
+    }
+    function addNewSubCategory() {
+        const cat = document.getElementById('manageCat').value;
+        const name = document.getElementById('newSubName').value.trim();
+        if(!name) return;
+        if(!appData.subCategories[cat]) appData.subCategories[cat] = [];
+        if(!appData.subCategories[cat].includes(name)) { appData.subCategories[cat].push(name); document.getElementById('newSubName').value=""; saveData(); }
+    }
+    function removeSubCat(cat, sub) { if(confirm("Delete?")) { appData.subCategories[cat] = appData.subCategories[cat].filter(s=>s!==sub); saveData(); } }
+
+    // --- OTHER UI LOGIC ---
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        appData.products.slice().reverse().forEach(p => {
+            let stockHtml = "";
+            for(let [k,v] of Object.entries(p.stock)) { let cls=v>0?'ok':'low'; stockHtml+=`<span class="stock-tag ${cls}">${k}: ${v}</span>`; }
+            tbody.innerHTML += `<tr><td><img src="${p.img}" class="thumb"></td><td><b>${p.name}</b><br><small>${p.subCats?p.subCats[0]:''}</small></td><td>₹${p.price}</td><td>${stockHtml}</td><td><button class="btn btn-sm" onclick="startEdit(${p.id})">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteProd(${p.id})">Del</button></td></tr>`;
+        });
+    }
+
+    function renderOrders() {
+        const tbody = document.getElementById('orderList');
+        tbody.innerHTML = "";
+        const orderArr = Object.entries(ordersData).map(([key, val]) => ({...val, key})).reverse();
+        if(!orderArr.length) { tbody.innerHTML="<tr><td colspan='4' style='text-align:center; padding:20px;'>No orders</td></tr>"; return; }
+        orderArr.forEach(o => {
+            let items = o.cart.map(i=>`<div>${i.name} (${i.size}) x${i.qty}</div>`).join('');
+            tbody.innerHTML += `<tr><td>${new Date(o.date).toLocaleDateString()}</td><td>${o.user.name}<br>${o.user.phone}</td><td>${items}<br><b>Total: ₹${o.total}</b></td><td><select class="status-select status-${o.status}" onchange="updateOrderStatus('${o.key}', this.value)"><option value="Ordered" ${o.status==='Ordered'?'selected':''}>Ordered</option><option value="Shipped" ${o.status==='Shipped'?'selected':''}>Shipped</option><option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option></select></td></tr>`;
+        });
+    }
+    async function updateOrderStatus(id, s) { 
+        await fetch(`https://jija-studio-default-rtdb.firebaseio.com/orders/${id}/status.json`, { method: "PUT", body: JSON.stringify(s) }); 
+        ordersData[id].status = s; 
+        alert("Status Updated"); 
+    }
+
+    function addCategoryBanner() {
+        const sub = document.getElementById('banCat').value;
+        const media = document.getElementById('banMedia').value;
+        const type = document.getElementById('banType').value;
+        if(sub && media) { appData.catBanners.push({ sub, media, type }); saveData(); }
+    }
+    function renderBanners() {
+        document.getElementById('bannerGrid').innerHTML = appData.catBanners.map((b, i) => 
+            `<div style="position:relative; height:80px; border-radius:6px; overflow:hidden; background:black;">
+                ${b.type==='vid' ? '<video src="'+b.media+'" style="width:100%; height:100%; object-fit:cover; opacity:0.7;"></video>' : '<img src="'+b.media+'" style="width:100%; height:100%; object-fit:cover; opacity:0.7;">'}
+                <div style="position:absolute; bottom:0; width:100%; color:white; font-size:0.7rem; text-align:center;">${b.sub}</div>
+                <div style="position:absolute; top:2px; right:2px; background:red; color:white; width:18px; height:18px; border-radius:50%; text-align:center; cursor:pointer;" onclick="delBanner(${i})">&times;</div>
+            </div>`
+        ).join('');
+    }
+    function delBanner(i) { appData.catBanners.splice(i,1); saveData(); }
+
+    function setTheme(name, el) {
+        appData.settings.theme = name;
+        document.querySelectorAll('.theme-option').forEach(d => d.classList.remove('active'));
+        if(el) el.classList.add('active');
+    }
+    async function saveSettings() { await saveData(); alert("Theme Saved!"); }
+</script>
+</body>
+</html>
