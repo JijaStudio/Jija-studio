@@ -72,7 +72,7 @@
         .form-label { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
         .form-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem; box-sizing: border-box; }
         
-        /* --- SMALLER GALLERY (AS REQUESTED) --- */
+        /* GALLERY (Upper Part) */
         .pv-gallery { position: relative; width: 100%; height: 220px; background: #f9f9f9; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
         .pv-main-img { width: 100%; height: 100%; object-fit: contain; }
         .pv-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.3); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; z-index: 10; }
@@ -81,6 +81,11 @@
         .thumb-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
         .thumb { width: 45px; height: 45px; border-radius: 6px; border: 2px solid transparent; object-fit: cover; cursor: pointer; }
         .thumb.active { border-color: var(--primary); }
+
+        /* SMALLER SIMILAR PRODUCTS */
+        .similar-row { display: flex; gap: 8px; overflow-x: auto; margin-top: 8px; padding-bottom: 5px; }
+        .sim-card { min-width: 80px; width: 80px; cursor: pointer; }
+        .sim-card img { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; }
 
         /* ANIMATION */
         .theme-particle { position: fixed; top: -10%; user-select: none; pointer-events: none; z-index: 4000; animation: fall linear forwards; opacity: 0.9; }
@@ -98,24 +103,20 @@
 
     <div id="loginModal" class="modal" style="display: flex;">
         <div class="modal-box" style="text-align: center;">
-            <div style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"><i class="ri-shield-check-line"></i></div>
+            <div style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"><i class="ri-shield-keyhole-line"></i></div>
             <h2 style="margin: 0 0 10px;">Login to Jija Studio</h2>
-            <p style="color: #64748b; margin-bottom: 20px;">We will send an OTP to your number</p>
+            <p style="color: #64748b; margin-bottom: 20px;">Verify your number to continue</p>
             
             <div id="loginStep1">
                 <input id="loginName" class="login-input" placeholder="Your Full Name">
-                <div style="display:flex; align-items:center; gap:5px; margin-bottom:15px;">
-                    <span style="padding:12px; background:#eee; border-radius:8px; border:1px solid #e2e8f0;">+91</span>
-                    <input id="loginPhone" class="login-input" type="tel" placeholder="Mobile Number" style="margin-bottom:0;">
-                </div>
-                <div id="recaptcha-container"></div>
-                <button class="btn-full" id="btnGetOtp" onclick="window.requestOtp()">Get OTP</button>
+                <input id="loginPhone" class="login-input" type="tel" placeholder="Mobile Number (10 digits)">
+                <button class="btn-full" onclick="requestOtp()">Get Verification Code</button>
             </div>
 
             <div id="loginStep2" style="display: none;">
-                <p style="color: green; font-size: 0.9rem; margin-bottom: 10px;">OTP Sent Successfully!</p>
-                <input id="loginOtp" class="login-input" type="number" placeholder="Enter 6-digit OTP">
-                <button class="btn-full" onclick="window.verifyOtp()">Verify & Login</button>
+                <p style="color: green; font-size: 0.9rem; margin-bottom: 10px;">Verification Code Sent!</p>
+                <input id="loginOtp" class="login-input" type="number" placeholder="Enter 4-digit Code">
+                <button class="btn-full" onclick="verifyOtp()">Verify & Login</button>
                 <div style="margin-top: 10px; font-size: 0.9rem; color: #64748b; cursor: pointer;" onclick="location.reload()">Change Number</div>
             </div>
         </div>
@@ -197,10 +198,10 @@
                 <p id="pvDesc" style="color:#666; font-size:0.85rem; line-height:1.4; margin-top:8px;"></p>
             </div>
 
-            <div style="font-weight:600; margin:10px 5px 0; font-size:0.9rem;">You might also like</div>
+            <div style="font-weight:600; margin:5px 5px 0; font-size:0.85rem; color:#64748b;">You might also like</div>
             <div class="similar-row" id="similarRow"></div>
 
-            <div class="review-box">
+            <div class="review-box" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
                 <div style="font-weight:600; margin-bottom:8px; font-size:0.9rem;">Reviews</div>
                 <div id="reviewList"></div>
                 <div style="display:flex; gap:5px; margin-top:10px;">
@@ -277,85 +278,6 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        // 🔥 IMPORTANT: PASTE YOUR CONFIG HERE 🔥
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        auth.languageCode = 'en';
-
-        // Setup Recaptcha
-        window.setupRecaptcha = () => {
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                    'size': 'invisible',
-                    'callback': (response) => { console.log("Recaptcha Verified"); }
-                });
-            }
-        };
-
-        // 1. Request OTP
-        window.requestOtp = () => {
-            const name = document.getElementById('loginName').value;
-            const phone = document.getElementById('loginPhone').value;
-            if(!name || phone.length !== 10) return alert("Enter valid Name and 10-digit Phone");
-
-            window.tempUserName = name; // Store name temporarily
-            window.setupRecaptcha();
-            
-            const phoneNumber = "+91" + phone;
-            const appVerifier = window.recaptchaVerifier;
-
-            document.getElementById('btnGetOtp').innerText = "Sending...";
-
-            signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-                .then((confirmationResult) => {
-                    window.confirmationResult = confirmationResult;
-                    document.getElementById('loginStep1').style.display = 'none';
-                    document.getElementById('loginStep2').style.display = 'block';
-                }).catch((error) => {
-                    console.error("SMS Error:", error);
-                    document.getElementById('btnGetOtp').innerText = "Get OTP";
-                    alert("SMS Error: " + error.message);
-                    window.recaptchaVerifier.render().then(function(widgetId) {
-                        grecaptcha.reset(widgetId);
-                    });
-                });
-        };
-
-        // 2. Verify OTP
-        window.verifyOtp = () => {
-            const code = document.getElementById('loginOtp').value;
-            if(!code) return alert("Enter OTP");
-
-            window.confirmationResult.confirm(code).then((result) => {
-                const user = result.user;
-                const userData = { 
-                    name: window.tempUserName, 
-                    phone: user.phoneNumber, 
-                    uid: user.uid 
-                };
-                localStorage.setItem('jijaUser', JSON.stringify(userData));
-                document.getElementById('loginModal').style.display = 'none';
-                alert("Login Successful! Welcome " + userData.name);
-                location.reload();
-            }).catch((error) => {
-                alert("Invalid OTP");
-            });
-        };
-    </script>
-
     <script>
         const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
         const ORDERS_URL = "https://jija-studio-default-rtdb.firebaseio.com/orders.json";
@@ -366,6 +288,7 @@
         let curProd = null, currentImages = [], currentImgIdx = 0;
         let user = JSON.parse(localStorage.getItem('jijaUser')); 
         let currentCat = 'all', currentSub = 'all';
+        let generatedOtp = null;
 
         const SIZES = {
             cloth: ["S", "M", "L", "XL", "XXL", "Free Size"],
@@ -400,7 +323,36 @@
             }
         };
 
-        // --- AUTHENTICATION IS NOW HANDLED BY THE MODULE SCRIPT ABOVE ---
+        // --- OTP LOGIC (TEMPLATE MATCH) ---
+        function requestOtp() {
+            const name = document.getElementById('loginName').value;
+            const phone = document.getElementById('loginPhone').value;
+            if(!name || phone.length !== 10) return alert("Enter valid Name and 10-digit Phone");
+
+            generatedOtp = Math.floor(1000 + Math.random() * 9000); 
+            // The Requested Template
+            const APP_NAME = "Jija Studio";
+            const msg = `${generatedOtp} is your verification code for ${APP_NAME}.`;
+            alert(msg);
+
+            document.getElementById('loginStep1').style.display = 'none';
+            document.getElementById('loginStep2').style.display = 'block';
+        }
+
+        function verifyOtp() {
+            const input = document.getElementById('loginOtp').value;
+            if(input == generatedOtp) {
+                user = { 
+                    name: document.getElementById('loginName').value, 
+                    phone: document.getElementById('loginPhone').value 
+                };
+                localStorage.setItem('jijaUser', JSON.stringify(user));
+                document.getElementById('loginModal').style.display = 'none';
+                alert("Login Successful! Welcome " + user.name);
+            } else {
+                alert("Incorrect verification code.");
+            }
+        }
 
         // --- ANIMATION & THEME ---
         function startThemeAnimations() {
@@ -535,17 +487,12 @@
             applyFilters();
         }
 
-        // --- NEW: EXPOSE OPENPROD TO WINDOW ---
+        // --- EXPOSE OPENPROD TO WINDOW ---
         window.openProd = function(id) {
             if (!appData.products) return; 
-            curProd = appData.products.find(p => p.id == id); // loose comparison for string/int IDs
+            curProd = appData.products.find(p => p.id == id);
+            if (!curProd) return;
             
-            if (!curProd) {
-                console.error("Product not found for ID:", id);
-                return;
-            }
-            
-            // Gather all images
             currentImages = [curProd.img];
             if(curProd.img2) currentImages.push(curProd.img2);
             if(curProd.img3) currentImages.push(curProd.img3);
@@ -557,7 +504,6 @@
             document.getElementById('pvPrice').innerText = '₹' + curProd.price;
             document.getElementById('pvDesc').innerText = curProd.desc || "";
             
-            // Video
             const vBox = document.getElementById('pvVideoBox');
             if(curProd.video && curProd.video.includes('embed')) {
                 vBox.style.display = 'block';
@@ -572,7 +518,6 @@
                 }
             }
 
-            // Similar
             const sims = appData.products.filter(p => p.cat === curProd.cat && p.id != curProd.id).slice(0,5);
             document.getElementById('similarRow').innerHTML = sims.map(p => `<div class="sim-card" onclick="window.openProd(${p.id})"><img src="${p.img}"></div>`).join('');
 
@@ -602,7 +547,7 @@
         function renderReviews() {
             const revs = appData.reviews.filter(r => r.pid === curProd.id);
             const list = document.getElementById('reviewList');
-            list.innerHTML = revs.length ? revs.map(r => `<div class="review-item"><strong>${r.user}</strong>: ${r.text}</div>`).join('') : "<div style='color:#999;'>No reviews yet.</div>";
+            list.innerHTML = revs.length ? revs.map(r => `<div class="review-item"><strong>${r.user}</strong>: ${r.text}</div>`).join('') : "<div style='color:#999; font-size:0.85rem;'>No reviews yet.</div>";
         }
 
         window.addReview = async function() {
