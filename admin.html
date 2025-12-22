@@ -24,13 +24,10 @@
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; }
         .btn { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
         
-        /* THEME GRID */
+        /* THEME & TAGS */
         .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; }
         .theme-opt { border: 2px solid #eee; padding: 15px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .theme-opt:hover { background: #fff0f5; border-color: var(--primary); }
         .theme-opt.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
-
-        /* TAGS */
         .tags-box { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; padding: 5px; background: #f8f9fa; border: 1px dashed #ddd; border-radius: 5px; min-height: 40px; }
         .tag { background: #e2e8f0; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
         
@@ -44,7 +41,7 @@
 </head>
 <body>
 
-<div id="loader">Syncing Data...</div>
+<div id="loader">Fixing Data...</div>
 
 <div class="sidebar">
     <div class="brand">
@@ -137,15 +134,14 @@
     const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
     const ORDERS_URL = "https://jija-studio-default-rtdb.firebaseio.com/orders.json";
     
-    // Safety Init
+    // SAFE INITIALIZATION
     let appData = { 
         products: [], 
         subCategories: { cloth:[], kids:[], footwear:[], jewelry:[], toy:[] }, 
-        settings: {theme:'default'} 
+        settings: { theme:'default' } 
     };
     let ordersData = {};
     let currentTags = [];
-    
     const SIZES = { cloth: ["S","M","L","XL","XXL"], kids: ["0-1Y","2-3Y","4-5Y"], footwear: [6,7,8,9,10], jewelry: ["Free Size"] };
 
     window.onload = loadData;
@@ -164,26 +160,39 @@
         try {
             const r = await fetch(DB_URL);
             const d = await r.json();
+            
             if(d) {
                 appData = d;
-                if(!appData.products) appData.products=[];
                 
-                // 🔥 CRITICAL FIX: Ensure subCategories is an Object (not array)
+                // --- 🔥 AUTO-REPAIR SCRIPT STARTS HERE 🔥 ---
+                // Problem: If subCategories is undefined OR is an Array (Old format), it breaks the site.
+                // Fix: Reset it to a proper Object structure.
                 if(!appData.subCategories || Array.isArray(appData.subCategories)) {
-                    console.log("Fixing DB Structure...");
-                    appData.subCategories = { cloth:["Saree"], kids:["Frock"], footwear:["Shoes"], jewelry:["Set"], toy:["Car"] };
+                    console.log("⚠️ Database Structure Outdated. Auto-Repairing...");
+                    appData.subCategories = { 
+                        cloth: ["Saree", "Kurti"], 
+                        kids: ["Frock", "Boys"], 
+                        footwear: ["Heels", "Shoes"], 
+                        jewelry: ["Necklace"], 
+                        toy: ["Car"] 
+                    };
+                    saveData(); // Save the fix immediately
                 }
-                
-                if(!appData.settings) appData.settings={theme:'default'};
-                
-                // Highlight Theme
+
+                if(!appData.products) appData.products = [];
+                if(!appData.settings) appData.settings = { theme: 'default' };
+                // --- REPAIR ENDS ---
+
+                // Highlight active theme
                 const tBtn = document.querySelector(`.theme-opt[onclick*="'${appData.settings.theme}'"]`);
                 if(tBtn) tBtn.classList.add('active');
             }
+
             const r2 = await fetch(ORDERS_URL);
             ordersData = await r2.json() || {};
             renderOrders();
-        } catch(e) { console.log(e); }
+
+        } catch(e) { console.error("Data Load Error:", e); }
         document.getElementById('loader').style.display = 'none';
     }
 
@@ -196,7 +205,7 @@
     // --- PRODUCT ---
     function renderSubSelect() {
         const cat = document.getElementById('pCat').value;
-        const subs = appData.subCategories[cat] || [];
+        const subs = appData.subCategories[cat] || []; // Safe access
         document.getElementById('pSubDrop').innerHTML = '<option value="">Select...</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
         document.getElementById('stockGrid').innerHTML = (SIZES[cat] || ["General"]).map(s => `<div><small>${s}</small><input class="stk-in" data-s="${s}" type="number" style="width:100%" value="0"></div>`).join('');
         renderTags();
@@ -246,7 +255,6 @@
     // --- CATS ---
     function renderManageTags() {
         const cat = document.getElementById('manCat').value;
-        // Fix for undefined array error
         const subs = appData.subCategories[cat] || [];
         document.getElementById('activeSubTags').innerHTML = subs.map(s => `<div class="tag">${s} <i class="ri-close-line" style="cursor:pointer" onclick="delSub('${cat}','${s}')"></i></div>`).join('');
     }
