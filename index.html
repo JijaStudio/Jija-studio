@@ -10,16 +10,13 @@
         :root { --primary: #D81B60; --dark: #1e293b; --light: #f8fafc; --white: #ffffff; --green: #10b981; }
         body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--light); padding-bottom: 80px; overflow-x: hidden; }
         
-        /* HEADER - SMALLER LOGO */
+        /* HEADER - SMALL LOGO, NO TAGLINE */
         header { background: var(--primary); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .logo-area { display: flex; align-items: center; gap: 8px; }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; }
         .logo img { height: 35px; width: 35px; border-radius: 50%; border: 2px solid white; object-fit: cover; } 
-        .brand-text { display: flex; flex-direction: column; }
-        .brand-name { font-weight: 700; font-size: 1rem; line-height: 1.1; }
-        .tagline { font-size: 0.6rem; opacity: 0.9; font-weight: 300; letter-spacing: 0.5px; }
-
-        .icon-btn { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; position: relative; margin-left: 10px; }
-        .badge { position: absolute; top: -5px; right: -5px; background: white; color: var(--primary); font-size: 0.6rem; font-weight: bold; width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
+        .icon-btn { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; position: relative; margin-left: 12px; }
+        .badge { position: absolute; top: -5px; right: -5px; background: white; color: var(--primary); font-size: 0.65rem; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
         /* SEARCH & FILTER */
         .search-wrap { padding: 10px 15px; background: white; position: sticky; top: 55px; z-index: 90; }
@@ -62,10 +59,10 @@
 
         /* MODALS */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-box { background: white; width: 90%; max-width: 500px; max-height: 90vh; border-radius: 15px; overflow-y: auto; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; }
+        .modal-box { background: white; width: 92%; max-width: 500px; max-height: 92vh; border-radius: 15px; overflow-y: auto; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; }
         .btn-full { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; border-radius: 8px; margin-top: 10px; }
 
-        /* INPUTS */
+        /* LOGIN INPUTS */
         #loginModal { z-index: 9999; }
         .login-input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; box-sizing: border-box; }
         .login-input:focus { border-color: var(--primary); outline: none; }
@@ -107,10 +104,6 @@
         /* CART TOTALS */
         .bill-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
         .bill-total { border-top: 1px dashed #ccc; padding-top: 10px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
-        .qty-box { display: flex; align-items: center; gap: 10px; border: 1px solid #ddd; border-radius: 4px; padding: 2px; width: fit-content; margin-top: 5px;}
-        .qty-btn { width: 25px; height: 25px; background: #eee; border: none; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-
-        /* SHARE BUTTON */
         .share-btn { position: absolute; top: 10px; right: 50px; background: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; color: #333; z-index: 20; font-size: 1.2rem; }
     </style>
 </head>
@@ -118,21 +111,34 @@
 
     <div id="loginModal" class="modal" style="display: flex;">
         <div class="modal-box" style="text-align: center;">
-            <div style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"><i class="ri-user-smile-line"></i></div>
-            <h2 style="margin: 0 0 10px;">Welcome to Jija Studio</h2>
-            <p style="color: #64748b; margin-bottom: 20px;">Enter details to start shopping</p>
-            <input id="loginName" class="login-input" placeholder="Your Full Name">
-            <input id="loginPhone" class="login-input" type="tel" placeholder="Mobile Number (10 digits)">
-            <button class="btn-full" onclick="doLogin()">Enter Shop</button>
+            <div style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"><i class="ri-shield-check-line"></i></div>
+            <h2 style="margin: 0 0 10px;">Login to Jija Studio</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">Verify your mobile number</p>
+            
+            <div id="loginStep1">
+                <input id="loginName" class="login-input" placeholder="Your Full Name">
+                <div style="display:flex; gap:5px; margin-bottom:15px;">
+                    <span style="padding:12px; background:#eee; border-radius:8px; border:1px solid #e2e8f0; font-size:0.9rem;">+91</span>
+                    <input id="loginPhone" class="login-input" type="tel" placeholder="Mobile Number" style="margin-bottom:0;">
+                </div>
+                <div id="recaptcha-container"></div>
+                <button class="btn-full" id="btnGetOtp" onclick="window.requestOtp()">Get Verification Code</button>
+            </div>
+
+            <div id="loginStep2" style="display: none;">
+                <p style="color: green; font-size: 0.9rem; margin-bottom: 10px;">OTP Sent Successfully!</p>
+                <input id="loginOtp" class="login-input" type="number" placeholder="Enter 6-digit OTP">
+                <button class="btn-full" onclick="window.verifyOtp()">Verify & Enter</button>
+                <div style="margin-top: 10px; font-size: 0.8rem; color: #64748b; cursor: pointer;" onclick="location.reload()">Wrong Number? Change</div>
+            </div>
         </div>
     </div>
 
     <header>
         <div class="logo-area">
-            <img src="logo.jpg" class="logo-img" onerror="this.src='https://via.placeholder.com/50?text=Logo'">
+            <img src="logo.jpg" onerror="this.src='https://via.placeholder.com/50?text=Logo'">
             <div class="brand-text">
                 <div class="brand-name">Jija Studio</div>
-                <div class="tagline">Where Tradition Meets Elegance</div>
             </div>
         </div>
         <div>
@@ -186,7 +192,6 @@
     <div id="productView" class="modal">
         <div class="modal-box">
             <span onclick="document.getElementById('productView').style.display='none'" style="position:absolute; right:15px; top:10px; font-size:1.8rem; cursor:pointer; z-index:30;">&times;</span>
-            
             <div class="share-btn" onclick="shareProduct()"><i class="ri-share-forward-line"></i></div>
 
             <div class="gallery-box">
@@ -303,6 +308,78 @@
         <p>© 2025 Jija Studio</p>
     </footer>
 
+    <div id="loader">Processing...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // 🔥 IMPORTANT: PASTE YOUR FIREBASE CONFIG HERE 🔥
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        auth.languageCode = 'en';
+
+        window.setupRecaptcha = () => {
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response) => { console.log("Recaptcha Verified"); }
+                });
+            }
+        };
+
+        window.requestOtp = () => {
+            const name = document.getElementById('loginName').value;
+            const phone = document.getElementById('loginPhone').value;
+            if(!name || phone.length !== 10) return alert("Enter valid Name and 10-digit Phone");
+
+            window.tempUserName = name; 
+            window.setupRecaptcha();
+            
+            const phoneNumber = "+91" + phone;
+            const appVerifier = window.recaptchaVerifier;
+
+            document.getElementById('btnGetOtp').innerText = "Sending OTP...";
+
+            signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+                .then((confirmationResult) => {
+                    window.confirmationResult = confirmationResult;
+                    document.getElementById('loginStep1').style.display = 'none';
+                    document.getElementById('loginStep2').style.display = 'block';
+                }).catch((error) => {
+                    console.error("SMS Error:", error);
+                    document.getElementById('btnGetOtp').innerText = "Get Verification Code";
+                    alert("SMS Error: " + error.message);
+                    window.recaptchaVerifier.render().then(function(widgetId) { grecaptcha.reset(widgetId); });
+                });
+        };
+
+        window.verifyOtp = () => {
+            const code = document.getElementById('loginOtp').value;
+            if(!code) return alert("Enter OTP");
+
+            window.confirmationResult.confirm(code).then((result) => {
+                const user = result.user;
+                const userData = { name: window.tempUserName, phone: user.phoneNumber, uid: user.uid };
+                localStorage.setItem('jijaUser', JSON.stringify(userData));
+                document.getElementById('loginModal').style.display = 'none';
+                alert("Login Successful! Welcome " + userData.name);
+                location.reload();
+            }).catch((error) => {
+                alert("Invalid OTP");
+            });
+        };
+    </script>
+
     <script>
         const DB_URL = "https://jija-studio-default-rtdb.firebaseio.com/jijaData.json";
         const ORDERS_URL = "https://jija-studio-default-rtdb.firebaseio.com/orders.json";
@@ -317,7 +394,12 @@
         let currentCat = 'all', currentSub = 'all';
 
         window.onload = async () => {
-            if(user) document.getElementById('loginModal').style.display='none';
+            if(user && user.phone) {
+                document.getElementById('loginModal').style.display='none';
+            } else {
+                document.getElementById('loginModal').style.display='flex';
+            }
+
             const r = await fetch(DB_URL);
             const d = await r.json();
             if(d) {
@@ -341,16 +423,6 @@
                 }
             }
         };
-
-        function doLogin() {
-            const n = document.getElementById('loginName').value;
-            const p = document.getElementById('loginPhone').value;
-            if(n && p) {
-                user = {name:n, phone:p};
-                localStorage.setItem('jijaUser', JSON.stringify(user));
-                document.getElementById('loginModal').style.display='none';
-            } else alert("Enter details");
-        }
 
         function applyTheme(t) {
             let r = document.documentElement.style;
@@ -379,8 +451,8 @@
 
         function renderHome() {
             document.getElementById('catBanners').innerHTML = appData.catBanners.map(b => {
-                const media = b.type === 'vid' ? <video src="${b.media}" class="cat-media" autoplay muted loop playsinline></video> : <img src="${b.media}" class="cat-media">;
-                return <div class="cat-card" onclick="alert('Filtered: ${b.sub}')">${media}<div class="cat-overlay">${b.sub}</div></div>;
+                const media = b.type === 'vid' ? `<video src="${b.media}" class="cat-media" autoplay muted loop playsinline></video>` : `<img src="${b.media}" class="cat-media">`;
+                return `<div class="cat-card" onclick="alert('Filtered: ${b.sub}')">${media}<div class="cat-overlay">${b.sub}</div></div>`;
             }).join('');
             applyFilters();
         }
@@ -389,7 +461,7 @@
             const list = appData.products.filter(p=>p.isBanner);
             if(list.length) {
                 document.getElementById('heroSlider').style.display='block';
-                document.getElementById('heroSlider').innerHTML = list.map((p,i)=><div class="slide ${i==0?'active':''}" style="opacity:${i==0?1:0}"><img src="${p.img}" onclick="openProd(${p.id})"></div>).join('');
+                document.getElementById('heroSlider').innerHTML = list.map((p,i)=>`<div class="slide ${i==0?'active':''}" style="opacity:${i==0?1:0}"><img src="${p.img}" onclick="openProd(${p.id})"></div>`).join('');
                 let idx=0; setInterval(()=>{ const s=document.querySelectorAll('.slide'); s[idx].style.opacity=0; idx=(idx+1)%s.length; s[idx].style.opacity=1; },4000);
             }
         }
@@ -427,7 +499,7 @@
                 const w = wishlist.includes(p.id) ? 'active' : '';
                 return `<div class="card">
                     <div class="card-img-wrap">
-                        ${p.badge ? <img src="${p.badge}" class="badge-img"> : ''}
+                        ${p.badge ? `<img src="${p.badge}" class="badge-img">` : ''}
                         <img src="${p.img}" onclick="openProd(${p.id})">
                         <div class="wish-icon ${w}" onclick="toggleWish(${p.id},this)"><i class="ri-heart-fill"></i></div>
                     </div>
@@ -446,8 +518,8 @@
             
             if(subs.length > 0) {
                 subRow.style.display = 'flex';
-                subRow.innerHTML = <div class="sub-chip active" onclick="filterSub('all', this)">All</div> + 
-                    subs.map(s => <div class="sub-chip" onclick="filterSub('${s}', this)">${s}</div>).join('');
+                subRow.innerHTML = `<div class="sub-chip active" onclick="filterSub('all', this)">All</div>` + 
+                    subs.map(s => `<div class="sub-chip" onclick="filterSub('${s}', this)">${s}</div>`).join('');
             } else {
                 subRow.style.display = 'none';
             }
@@ -456,7 +528,7 @@
             const sizes = SIZES[cat];
             if(sizes) {
                 sf.style.display = 'block';
-                sf.innerHTML = '<option value="all">📏 All Sizes</option>' + sizes.map(s => <option value="${s}">${s}</option>).join('');
+                sf.innerHTML = '<option value="all">📏 All Sizes</option>' + sizes.map(s => `<option value="${s}">${s}</option>`).join('');
             } else sf.style.display = 'none';
 
             applyFilters();
@@ -495,12 +567,12 @@
             sel.innerHTML = '<option value="">Select Size</option>';
             if(curProd.stock) {
                 for(let [s, q] of Object.entries(curProd.stock)) {
-                    if(q > 0) sel.innerHTML += <option value="${s}">Size ${s}</option>;
+                    if(q > 0) sel.innerHTML += `<option value="${s}">Size ${s}</option>`;
                 }
             }
 
             const sims = appData.products.filter(p => p.cat === curProd.cat && p.id != curProd.id).slice(0,5);
-            document.getElementById('similarRow').innerHTML = sims.map(p => <div class="sim-card" onclick="openProd(${p.id})"><img src="${p.img}"></div>).join('');
+            document.getElementById('similarRow').innerHTML = sims.map(p => `<div class="sim-card" onclick="openProd(${p.id})"><img src="${p.img}"></div>`).join('');
 
             renderReviews();
             document.getElementById('productView').style.display = 'flex';
@@ -509,7 +581,7 @@
         function updateGallery() {
             document.getElementById('pvImg').src = imgs[imgIdx];
             document.getElementById('pvThumbs').innerHTML = imgs.map((src, i) => 
-                <img src="${src}" class="thumb ${i === imgIdx ? 'active' : ''}" onclick="setGallery(${i})">
+                `<img src="${src}" class="thumb ${i === imgIdx ? 'active' : ''}" onclick="setGallery(${i})">`
             ).join('');
         }
 
@@ -528,7 +600,7 @@
         function renderReviews() {
             const revs = appData.reviews.filter(r => r.pid === curProd.id);
             const list = document.getElementById('reviewList');
-            list.innerHTML = revs.length ? revs.map(r => <div class="review-item"><strong>${r.user}</strong>: ${r.text}</div>).join('') : "<div style='color:#999; font-size:0.85rem;'>No reviews yet.</div>";
+            list.innerHTML = revs.length ? revs.map(r => `<div class="review-item"><strong>${r.user}</strong>: ${r.text}</div>`).join('') : "<div style='color:#999; font-size:0.85rem;'>No reviews yet.</div>";
         }
 
         async function addReview() {
@@ -562,7 +634,7 @@
             if(!wishlist.length) list.innerHTML = "<p>Empty</p>";
             else list.innerHTML = wishlist.map(id => {
                 const p = appData.products.find(x => x.id === id);
-                return p ? <div style="display:flex; gap:10px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;"><img src="${p.img}" style="width:50px; height:50px; object-fit:cover;"><div><b>${p.name}</b><br>₹${p.price}</div></div> : '';
+                return p ? `<div style="display:flex; gap:10px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;"><img src="${p.img}" style="width:50px; height:50px; object-fit:cover;"><div><b>${p.name}</b><br>₹${p.price}</div></div>` : '';
             }).join('');
             document.getElementById('wishModal').style.display = 'flex';
         }
@@ -616,7 +688,7 @@
 
             if(!state || !dist || !taluka || !pin || !city || !local) return alert("Fill all fields");
 
-            const fullAddr = ${local}\n${city}, ${taluka}\n${dist}, ${state} - ${pin};
+            const fullAddr = `${local}\n${city}, ${taluka}\n${dist}, ${state} - ${pin}`;
 
             const order = {
                 date: new Date().toISOString(),
@@ -630,8 +702,8 @@
 
             await fetch(ORDERS_URL, { method: "POST", body: JSON.stringify(order) });
 
-            let msg = *NEW ORDER*\nUser: ${user.name}\nAddr: ${fullAddr}\nItems:\n + cart.map(i=>- ${i.name} (${i.size})).join('\n') + \nTotal: ₹${order.total};
-            window.open(https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)});
+            let msg = `*NEW ORDER*\nUser: ${user.name}\nAddr: ${fullAddr}\nItems:\n` + cart.map(i=>`- ${i.name} (${i.size})`).join('\n') + `\nTotal: ₹${order.total}`;
+            window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)}`);
             
             cart=[]; document.getElementById('cCount').innerText=0;
             document.getElementById('checkoutModal').style.display='none';
