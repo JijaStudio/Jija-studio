@@ -13,12 +13,10 @@
         
         /* HEADER */
         header { background: var(--primary); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .logo-area { display: flex; align-items: center; gap: 8px; }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; }
         .logo img { height: 35px; width: 35px; border-radius: 50%; border: 2px solid white; object-fit: cover; } 
-        .brand-text { display: flex; flex-direction: column; }
-        .brand-name { font-weight: 700; font-size: 1rem; line-height: 1.1; }
-
-        .icon-btn { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; position: relative; margin-left: 10px; }
+        
+        .icon-btn { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; position: relative; margin-left: 12px; }
         .badge { position: absolute; top: -5px; right: -5px; background: white; color: var(--primary); font-size: 0.6rem; font-weight: bold; width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
         /* SEARCH & FILTER */
@@ -36,82 +34,76 @@
         .filter-options { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; background: var(--light); }
         .filter-select { padding: 6px; border-radius: 6px; border: 1px solid #ddd; background: white; font-size: 0.8rem; outline: none; color: #475569; }
 
-        /* HERO & GRID */
+        /* HERO SLIDER */
         .hero-slider { height: 200px; margin: 10px 15px; border-radius: 12px; overflow: hidden; position: relative; display: none; background: #ddd; }
         .slide { position: absolute; inset: 0; opacity: 0; transition: 0.5s; display: flex; align-items: center; justify-content: center; }
         .slide.active { opacity: 1; }
         .slide img { width: 100%; height: 100%; object-fit: cover; }
 
+        /* BANNERS (Ads) */
         .cat-grid { display: flex; gap: 10px; padding: 5px 15px 15px; overflow-x: auto; scrollbar-width: none; }
-        .cat-card { min-width: 90px; height: 90px; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .cat-card { min-width: 140px; height: 80px; border-radius: 8px; overflow: hidden; position: relative; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .cat-media { width: 100%; height: 100%; object-fit: cover; }
-        .cat-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.75rem; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .cat-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.85rem; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 15px; }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; cursor: pointer; transition: 0.3s; }
+        /* PRODUCT GRID */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 15px; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; position: relative; transition: 0.2s; }
         .card-img-wrap { position: relative; height: 200px; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
-        .wish-icon { position: absolute; top: 8px; right: 8px; background: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 5; transition: 0.2s; }
+        .wish-icon { position: absolute; top: 10px; right: 10px; background: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 5; }
         .wish-icon.active { color: var(--primary); }
-        .badge-img { position: absolute; top: 8px; left: 8px; width: 30px; z-index: 5; }
+        .badge-img { position: absolute; top: 10px; left: 10px; width: 35px; z-index: 5; }
         
         .info { padding: 10px; }
-        .title { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
-        .price { font-weight: 700; font-size: 1rem; }
-        .btn-view { width: 100%; padding: 6px; background: var(--primary); color: white; border: none; border-radius: 4px; margin-top: 5px; cursor: pointer; font-size: 0.85rem; }
+        .title { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; color: #333; }
+        .price { font-weight: 700; font-size: 1.1rem; color: #1e293b; }
+        .btn-view { width: 100%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 6px; margin-top: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500; }
 
         /* MODALS */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-box { background: white; width: 90%; max-width: 500px; max-height: 90vh; border-radius: 15px; overflow-y: auto; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; }
-        .btn-full { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; border-radius: 8px; margin-top: 10px; }
+        .modal-box { background: white; width: 92%; max-width: 500px; max-height: 92vh; border-radius: 15px; overflow-y: auto; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; }
+        .btn-full { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; font-weight: 600; border-radius: 8px; margin-top: 15px; font-size: 1rem; cursor: pointer; }
 
-        /* LOGIN INPUTS */
-        #loginModal { z-index: 9999; }
+        /* LOGIN */
         .login-input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; box-sizing: border-box; }
         .login-input:focus { border-color: var(--primary); outline: none; }
 
-        /* ADDRESS FORM */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .form-label { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
-        .form-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem; box-sizing: border-box; }
-        
         /* GALLERY */
-        .pv-gallery { position: relative; width: 100%; height: 220px; background: #f9f9f9; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+        .pv-gallery { position: relative; width: 100%; height: 260px; background: #f9f9f9; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
         .pv-main-img { width: 100%; height: 100%; object-fit: contain; }
-        .pv-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.3); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; z-index: 10; }
-        .pv-arrow.left { left: 8px; }
-        .pv-arrow.right { right: 8px; }
-        .thumb-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
-        .thumb { width: 45px; height: 45px; border-radius: 6px; border: 2px solid transparent; object-fit: cover; cursor: pointer; }
-        .thumb.active { border-color: var(--primary); }
+        .arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.3); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; }
+        .arrow.left { left: 10px; } .arrow.right { right: 10px; }
+        .thumbs { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; }
+        .t-img { width: 50px; height: 50px; border-radius: 6px; border: 2px solid transparent; object-fit: cover; cursor: pointer; }
+        .t-img.active { border-color: var(--primary); }
 
-        /* SIMILAR & REVIEWS */
-        .similar-row { display: flex; gap: 8px; overflow-x: auto; margin-top: 8px; padding-bottom: 5px; scrollbar-width: none; }
+        /* COMPACT SIMILAR ITEMS */
+        .similar-row { display: flex; gap: 10px; overflow-x: auto; margin-top: 10px; padding-bottom: 5px; scrollbar-width: none; }
         .sim-card { min-width: 80px; width: 80px; cursor: pointer; flex-shrink: 0; }
-        .sim-card img { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; }
+        .sim-card img { width: 100%; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
 
-        .review-box { margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; }
-        .review-item { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; }
+        /* SHARE BUTTON */
+        .share-btn { position: absolute; top: 15px; right: 60px; background: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; color: #333; z-index: 20; font-size: 1.2rem; }
 
-        /* ANIMATION */
-        .theme-particle { position: fixed; top: -10%; user-select: none; pointer-events: none; z-index: 4000; animation: fall linear forwards; opacity: 0.9; }
-        @keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
-        
-        /* TRACKING */
-        .track-item { border: 1px solid #eee; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: white; }
-        .track-status { font-weight: bold; color: var(--primary); margin-top: 5px; font-size: 0.85rem; }
-        
-        /* LOADER */
-        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 8000; display: flex; justify-content: center; align-items: center; color: var(--primary); font-weight: bold; display: none; }
-    
-        /* CART TOTALS */
-        .bill-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
-        .bill-total { border-top: 1px dashed #ccc; padding-top: 10px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
-        .share-btn { position: absolute; top: 10px; right: 50px; background: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; color: #333; z-index: 20; font-size: 1.2rem; }
+        /* CART & BILL */
+        .bill-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .bill-total { border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px; font-weight: bold; font-size: 1.1rem; text-align: right; }
 
         /* FOOTER */
-        footer { background: #fff; padding: 20px; text-align: center; margin-top: 30px; border-top: 1px solid #eee; color: #64748b; font-size: 0.8rem; }
+        footer { background: #fff; padding: 20px; text-align: center; margin-top: 30px; font-size: 0.85rem; color: #666; border-top: 1px solid #eee; }
         .footer-link { color: var(--primary); font-weight: 600; text-decoration: none; margin: 0 5px; cursor: pointer; }
+
+        /* ANIMATION */
+        .theme-particle { position: fixed; top: -10%; z-index: 9999; animation: fall linear forwards; font-size: 20px; pointer-events: none; }
+        @keyframes fall { 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+        
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 8000; display: flex; justify-content: center; align-items: center; color: var(--primary); font-weight: bold; display: none; }
+        
+        @media (max-width: 400px) {
+            .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; padding: 10px; }
+            .card-img-wrap { height: 180px; }
+        }
     </style>
 </head>
 <body>
@@ -120,31 +112,27 @@
         <div class="modal-box" style="text-align: center;">
             <div style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"><i class="ri-user-heart-line"></i></div>
             <h2 style="margin: 0 0 5px;">Welcome to Jija Studio</h2>
-            <p style="color: #64748b; margin-bottom: 25px; font-size: 0.9rem;">Enter your details to start shopping</p>
-            
-            <input id="loginName" class="login-input" placeholder="Your Full Name">
-            <input id="loginPhone" class="login-input" type="tel" placeholder="Mobile Number (10 digits)">
-            
+            <p style="color: #64748b; margin-bottom: 25px; font-size: 0.9rem;">Enter details to start shopping</p>
+            <input id="loginName" class="login-input" placeholder="Your Name">
+            <input id="loginPhone" class="login-input" type="tel" placeholder="Mobile Number">
             <button class="btn-full" onclick="doLogin()">Enter Shop</button>
         </div>
     </div>
 
     <header>
-        <div class="logo-area">
+        <div class="logo">
             <img src="logo.jpg" onerror="this.src='https://via.placeholder.com/50?text=Logo'">
-            <div class="brand-text">
-                <div class="brand-name">Jija Studio</div>
-            </div>
+            Jija Studio
         </div>
-        <div>
-            <i class="ri-instagram-line icon-btn" onclick="window.open('https://www.instagram.com/jija_studio_1?igsh=MXIxMXVpMms0NzliZw==', '_blank')" style="font-size:1.4rem;"></i>
+        <div class="icon-group">
+            <i class="ri-instagram-line icon-btn" onclick="window.open('https://www.instagram.com/jija_studio_1?igsh=MXIxMXVpMms0NzliZw==', '_blank')"></i>
             <button class="icon-btn" onclick="openWishlist()">
                 <i class="ri-heart-3-line"></i> <span class="badge" id="wCount">0</span>
             </button>
             <button class="icon-btn" onclick="openCart()">
                 <i class="ri-shopping-cart-line"></i> <span class="badge" id="cCount">0</span>
             </button>
-            <button class="icon-btn" onclick="openMyOrders()" style="font-size:1rem; margin-left:10px;">📦 Orders</button>
+            <button class="icon-btn" onclick="openMyOrders()" style="font-size:1.1rem; margin-left:10px;">📦 Orders</button>
         </div>
     </header>
 
@@ -176,7 +164,7 @@
             <option value="high">Price: High to Low</option>
         </select>
         <select id="sizeFilter" class="filter-select" style="display:none;" onchange="applyFilters()">
-            <option value="all">📏 All Sizes</option>
+            <option value="all">📏 Size</option>
         </select>
     </div>
 
@@ -186,7 +174,7 @@
 
     <div id="productView" class="modal">
         <div class="modal-box" style="padding:15px;">
-            <span onclick="document.getElementById('productView').style.display='none'" style="position:absolute; right:15px; top:10px; font-size:1.8rem; cursor:pointer; z-index:30;">&times;</span>
+            <span onclick="document.getElementById('productView').style.display='none'" style="position:absolute; right:15px; top:15px; font-size:1.8rem; cursor:pointer; z-index:30; background:rgba(255,255,255,0.8); border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center;">&times;</span>
             <div class="share-btn" onclick="shareProduct()"><i class="ri-share-forward-line"></i></div>
 
             <div class="gallery-box">
@@ -199,22 +187,24 @@
             <div id="pvVideoBox" style="display:none; padding-bottom:10px;"><iframe id="pvVideo" width="100%" height="200" frameborder="0"></iframe></div>
 
             <div style="padding:0 5px 10px;">
-                <h2 id="pvTitle" style="margin:0 0 4px; font-size:1.2rem;"></h2>
-                <div style="font-size:1.1rem; font-weight:700; color:var(--primary);"><span id="pvPrice"></span></div>
-                <select id="pvSize" style="width:100%; padding:8px; margin-top:8px; border-radius:6px; border:1px solid #ddd; font-size:0.9rem;"></select>
-                <div id="pvStock" style="font-size:0.8rem; margin-top:4px; font-weight:600;"></div>
-                <p id="pvDesc" style="color:#666; font-size:0.85rem; line-height:1.4; margin-top:8px;"></p>
+                <h2 id="pvTitle" style="margin:0 0 5px; font-size:1.1rem; line-height:1.3;"></h2>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div id="pvPrice" style="color:var(--primary); font-weight:700; font-size:1.3rem;"></div>
+                    <div id="pvStock" style="font-size:0.8rem; font-weight:600; color:var(--green); background:#f0fdf4; padding:2px 8px; border-radius:4px;"></div>
+                </div>
+                <select id="pvSize" style="width:100%; padding:10px; margin-top:10px; border-radius:8px; border:1px solid #ddd; font-size:0.9rem; background:#f9f9f9;"></select>
+                <p id="pvDesc" style="color:#555; font-size:0.85rem; line-height:1.5; margin-top:10px;"></p>
             </div>
 
-            <div style="font-weight:600; font-size:0.85rem; margin-top:10px; color:#666;">Similar Items</div>
+            <div style="font-weight:600; font-size:0.9rem; margin-top:15px; color:#333;">Similar Items</div>
             <div id="similarRow" class="similar-row"></div>
 
             <div class="review-box">
-                <div style="font-weight:600; margin-bottom:8px; font-size:0.9rem;">Reviews</div>
-                <div id="reviewList" style="max-height:80px; overflow-y:auto; margin-bottom:5px; font-size:0.8rem;"></div>
-                <div style="display:flex; gap:5px;">
-                    <input id="revText" placeholder="Review..." style="flex:1; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:0.85rem;">
-                    <button onclick="addReview()" style="background:#333; color:white; border:none; padding:0 12px; border-radius:4px; font-size:0.85rem;">Post</button>
+                <div style="font-weight:600; font-size:0.9rem; margin-bottom:10px;">Customer Reviews</div>
+                <div id="reviewList" style="max-height:100px; overflow-y:auto; margin-bottom:10px; font-size:0.85rem; color:#555;"></div>
+                <div style="display:flex; gap:8px;">
+                    <input id="revText" placeholder="Write a review..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.85rem;">
+                    <button onclick="addReview()" style="background:#333; color:white; border:none; padding:0 15px; border-radius:6px; font-size:0.85rem;">Post</button>
                 </div>
             </div>
 
@@ -225,7 +215,7 @@
     <div id="cartModal" class="modal">
         <div class="modal-box">
             <h3>Cart</h3>
-            <div style="background:#fff3cd; color:#856404; padding:10px; border-radius:5px; margin-bottom:10px; font-size:0.8rem; text-align:center;">
+            <div style="background:#fff7ed; color:#9a3412; padding:10px; border-radius:6px; margin-bottom:15px; font-size:0.85rem; text-align:center; border:1px solid #ffedd5;">
                 ⚠️ <strong>Note:</strong> No Return Policy Available.
             </div>
             
@@ -244,10 +234,10 @@
 
     <div id="checkoutModal" class="modal">
         <div class="modal-box">
-            <h3 style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">Shipping Details</h3>
+            <h3 style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:10px;">Shipping Details</h3>
             
             <div class="form-grid">
-                <div><label class="form-label">Country</label><input class="form-input" value="India 🇮🇳" disabled></div>
+                <div><label class="form-label">Country</label><input class="form-input" value="India 🇮🇳" disabled style="background:#f1f5f9;"></div>
                 <div><label class="form-label">State</label><input id="addrState" placeholder="Enter State" class="form-input"></div>
             </div>
 
@@ -267,7 +257,7 @@
             </div>
 
             <button class="btn-full" style="background:#25D366;" onclick="placeOrder()"><i class="ri-whatsapp-line"></i> PLACE ORDER ON WHATSAPP</button>
-            <button onclick="document.getElementById('checkoutModal').style.display='none'" style="width:100%; padding:10px; background:none; border:none; margin-top:5px; color:#64748b;">Cancel</button>
+            <button onclick="document.getElementById('checkoutModal').style.display='none'" style="width:100%; padding:12px; background:none; border:none; margin-top:5px; color:#64748b;">Cancel</button>
         </div>
     </div>
 
@@ -315,11 +305,11 @@
     </div>
 
     <footer>
-        <p>
+        <div class="footer-links">
             <span class="footer-link" onclick="document.getElementById('aboutModal').style.display='flex'">About Us</span> | 
             <span class="footer-link" onclick="document.getElementById('aboutModal').style.display='flex'">Store Address</span> |
             <span class="footer-link" onclick="document.getElementById('aboutModal').style.display='flex'">Policy</span>
-        </p>
+        </div>
         <p style="margin-top:10px; opacity:0.8;">© 2025 Jija Studio. All rights reserved.</p>
     </footer>
 
@@ -339,7 +329,12 @@
         let currentCat = 'all', currentSub = 'all';
 
         window.onload = async () => {
-            if(user) document.getElementById('loginModal').style.display='none';
+            if(user && user.phone) {
+                document.getElementById('loginModal').style.display='none';
+            } else {
+                document.getElementById('loginModal').style.display='flex';
+            }
+
             const r = await fetch(DB_URL);
             const d = await r.json();
             if(d) {
@@ -401,10 +396,18 @@
 
         function renderHome() {
             document.getElementById('catBanners').innerHTML = appData.catBanners.map(b => {
-                const media = b.type === 'vid' ? `<video src="${b.media}" class="cat-media" autoplay muted loop playsinline></video>` : `<img src="${b.media}" class="cat-media">`;
-                return `<div class="cat-card" onclick="alert('Filtered: ${b.sub}')">${media}<div class="cat-overlay">${b.sub}</div></div>`;
+                return `<div class="cat-card" onclick="filterByBanner('${b.sub}')"><img src="${b.media}" class="cat-media"><div class="cat-overlay">${b.sub}</div></div>`;
             }).join('');
             applyFilters();
+        }
+
+        function filterByBanner(sub) {
+            currentSub = sub;
+            currentCat = 'all';
+            document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+            document.querySelector('.tab-btn').classList.add('active'); // Highlight 'All'
+            applyFilters();
+            document.getElementById('grid').scrollIntoView({behavior:'smooth'});
         }
 
         function initSlider() {
@@ -422,6 +425,7 @@
             if(q) list = list.filter(p => p.name.toLowerCase().includes(q));
             
             if(currentCat!=='all') list = list.filter(p => p.cat === currentCat);
+            // Updated filtering logic to check array of subcats
             if(currentSub!=='all') list = list.filter(p => p.subCats && p.subCats.includes(currentSub));
 
             const budget = document.getElementById('budgetFilter').value;
@@ -491,21 +495,17 @@
             applyFilters();
         }
 
-        // --- EXPOSE OPENPROD TO WINDOW ---
         function openProd(id) {
-            curProd = appData.products.find(p => p.id == id);
-            if (!curProd) return;
-            
+            curProd = appData.products.find(p=>p.id==id);
+            if(!curProd) return;
             imgs = [curProd.img];
             if(curProd.img2) imgs.push(curProd.img2);
             if(curProd.img3) imgs.push(curProd.img3);
-            imgIdx = 0;
+            imgIdx=0; updateGal();
 
-            updateGallery();
-
-            document.getElementById('pvTitle').innerText = curProd.name;
-            document.getElementById('pvPrice').innerText = '₹' + curProd.price;
-            document.getElementById('pvDesc').innerText = curProd.desc || "";
+            document.getElementById('pvTitle').innerText=curProd.name;
+            document.getElementById('pvPrice').innerText='₹'+curProd.price;
+            document.getElementById('pvDesc').innerText=curProd.desc||"";
             
             const vBox = document.getElementById('pvVideoBox');
             if(curProd.video && curProd.video.includes('embed')) {
@@ -516,57 +516,44 @@
             const sel = document.getElementById('pvSize');
             sel.innerHTML = '<option value="">Select Size</option>';
             if(curProd.stock) {
-                for(let [s, q] of Object.entries(curProd.stock)) {
-                    if(q > 0) sel.innerHTML += `<option value="${s}">Size ${s}</option>`;
-                }
+                for(let [s,q] of Object.entries(curProd.stock)) if(q>0) sel.innerHTML+=`<option value="${s}">Size ${s}</option>`;
             }
 
-            const sims = appData.products.filter(p => p.cat === curProd.cat && p.id != curProd.id).slice(0,5);
-            document.getElementById('similarRow').innerHTML = sims.map(p => `<div class="sim-card" onclick="openProd(${p.id})"><img src="${p.img}"></div>`).join('');
+            const sims = appData.products.filter(p=>p.cat===curProd.cat && p.id!=curProd.id).slice(0,5);
+            document.getElementById('similarRow').innerHTML = sims.map(p=>`<div class="sim-card" onclick="openProd(${p.id})"><img src="${p.img}"></div>`).join('');
 
             renderReviews();
-            document.getElementById('productView').style.display = 'flex';
+            document.getElementById('productView').style.display='flex';
         }
 
-        function updateGallery() {
-            document.getElementById('pvImg').src = imgs[imgIdx];
-            document.getElementById('pvThumbs').innerHTML = imgs.map((src, i) => 
-                `<img src="${src}" class="thumb ${i === imgIdx ? 'active' : ''}" onclick="setGallery(${i})">`
-            ).join('');
+        function updateGal() {
+            document.getElementById('pvImg').src=imgs[imgIdx];
+            document.getElementById('pvThumbs').innerHTML = imgs.map((u,i)=>`<img src="${u}" class="t-img ${i==imgIdx?'active':''}" onclick="setGal(${i})">`).join('');
         }
-
-        function moveImg(n) {
-            imgIdx += n;
-            if(imgIdx >= imgs.length) imgIdx = 0;
-            if(imgIdx < 0) imgIdx = imgs.length - 1;
-            updateGallery();
-        }
-
-        function setGallery(idx) {
-            imgIdx = idx;
-            updateGallery();
-        }
+        function moveImg(n) { imgIdx+=n; if(imgIdx>=imgs.length)imgIdx=0; if(imgIdx<0)imgIdx=imgs.length-1; updateGal(); }
+        function setGal(i) { imgIdx=i; updateGal(); }
 
         function renderReviews() {
-            const revs = appData.reviews.filter(r => r.pid === curProd.id);
-            const list = document.getElementById('reviewList');
-            list.innerHTML = revs.length ? revs.map(r => `<div class="review-item"><strong>${r.user}</strong>: ${r.text}</div>`).join('') : "<div style='color:#999; font-size:0.85rem;'>No reviews yet.</div>";
+            const revs = appData.reviews.filter(r=>r.pid==curProd.id);
+            document.getElementById('reviewList').innerHTML = revs.length ? revs.map(r=>`<div class="review-item"><strong>${r.user}</strong>: ${r.text}</div>`).join('') : "<div style='color:#999; font-size:0.85rem;'>No reviews yet.</div>";
         }
 
         async function addReview() {
             const txt = document.getElementById('revText').value;
-            if(!txt) return;
-            appData.reviews.push({ pid: curProd.id, user: user.name, text: txt });
-            await fetch(DB_URL, { method: "PUT", body: JSON.stringify(appData) });
-            document.getElementById('revText').value="";
-            renderReviews();
+            if(txt) {
+                if(!appData.reviews) appData.reviews=[];
+                appData.reviews.push({pid:curProd.id, user:user.name, text:txt});
+                await fetch(DB_URL,{method:'PUT',body:JSON.stringify(appData)});
+                document.getElementById('revText').value="";
+                renderReviews();
+            }
         }
 
         function addToCart() {
             const sz = document.getElementById('pvSize').value;
             if(!sz) return alert("Select Size");
             cart.push({...curProd, size:sz, qty:1});
-            document.getElementById('cCount').innerText = cart.length;
+            document.getElementById('cCount').innerText=cart.length;
             document.getElementById('productView').style.display='none';
             alert("Added!");
         }
@@ -577,7 +564,7 @@
             localStorage.setItem('jijaWish', JSON.stringify(wishlist));
             updateWishIcon();
         }
-        function updateWishIcon() { document.getElementById('wCount').innerText = wishlist.length; }
+        function updateWishIcon() { document.getElementById('wCount').innerText=wishlist.length; }
         
         function openWishlist() {
             const list = document.getElementById('wishListContainer');
@@ -594,32 +581,40 @@
             let total = 0;
             let totalItems = 0;
             
-            list.innerHTML = cart.map((i, idx) => { 
-                total += parseInt(i.price);
-                totalItems++;
-                return `
-                <div style="display:flex; gap:10px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px; align-items:center;">
-                    <img src="${i.img}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
-                    <div style="flex:1;">
-                        <div style="font-weight:600; font-size:0.9rem;">${i.name}</div>
-                        <div style="font-size:0.8rem; color:#666;">Size: ${i.size}</div>
-                    </div>
-                    <div style="font-weight:700;">₹${i.price}</div>
-                    <button onclick="removeFromCart(${idx})" style="border:none; background:none; color:red; margin-left:5px;">&times;</button>
-                </div>`; 
-            }).join('');
+            if(!cart.length) {
+                list.innerHTML = "<p style='text-align:center; padding:20px;'>Cart is empty.</p>";
+                document.getElementById('cartSub').innerText = '₹0';
+                document.getElementById('cartDel').innerText = '₹0';
+                document.getElementById('cartTotal').innerText = '0';
+            } else {
+                list.innerHTML = cart.map((i, idx) => { 
+                    total += parseInt(i.price);
+                    totalItems++;
+                    return `
+                    <div style="display:flex; gap:10px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px; align-items:center;">
+                        <img src="${i.img}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
+                        <div style="flex:1;">
+                            <div style="font-weight:600; font-size:0.9rem;">${i.name}</div>
+                            <div style="font-size:0.8rem; color:#666;">Size: ${i.size}</div>
+                        </div>
+                        <div style="font-weight:700;">₹${i.price}</div>
+                        <button onclick="removeFromCart(${idx})" style="border:none; background:none; color:red; margin-left:5px;">&times;</button>
+                    </div>`; 
+                }).join('');
 
-            const delivery = totalItems * SHIPPING_PER_ITEM;
-            document.getElementById('cartSub').innerText = '₹' + total;
-            document.getElementById('cartDel').innerText = '+ ₹' + delivery;
-            document.getElementById('cartTotal').innerText = total + delivery;
+                const delivery = totalItems * SHIPPING_PER_ITEM;
+                document.getElementById('cartSub').innerText = '₹' + total;
+                document.getElementById('cartDel').innerText = '+ ₹' + delivery;
+                document.getElementById('cartTotal').innerText = total + delivery;
+            }
+            
             document.getElementById('cartModal').style.display='flex';
         }
 
         function removeFromCart(idx) {
             cart.splice(idx, 1);
-            openCart();
             document.getElementById('cCount').innerText = cart.length;
+            openCart();
         }
 
         function openCheckout() {
@@ -629,31 +624,15 @@
         }
 
         async function placeOrder() {
-            const state = document.getElementById('addrState').value;
-            const dist = document.getElementById('addrDist').value;
-            const taluka = document.getElementById('addrTaluka').value;
-            const pin = document.getElementById('addrPin').value;
-            const city = document.getElementById('addrCity').value;
-            const local = document.getElementById('addrLocal').value;
-
-            if(!state || !dist || !taluka || !pin || !city || !local) return alert("Fill all fields");
-
-            const fullAddr = `${local}\n${city}, ${taluka}\n${dist}, ${state} - ${pin}`;
+            const addr = document.getElementById('addrLocal').value;
+            if(!addr) return alert("Enter Address");
+            const fullAddr = `${addr}, ${document.getElementById('addrCity').value}, ${document.getElementById('addrDist').value}`;
             const totalAmount = document.getElementById('cartTotal').innerText;
 
-            const order = {
-                date: new Date().toISOString(),
-                user: user,
-                address: { city: fullAddr },
-                cart: cart,
-                total: totalAmount,
-                txnId: "Direct-WA",
-                status: "Ordered"
-            };
-
+            const order = { date: new Date().toISOString(), user: user, address: {city:fullAddr}, cart:cart, total:totalAmount, status: "Ordered" };
             await fetch(ORDERS_URL, { method: "POST", body: JSON.stringify(order) });
-
-            let msg = `*NEW ORDER*\nUser: ${user.name}\nAddr: ${fullAddr}\nItems:\n` + cart.map(i=>`- ${i.name} (${i.size})`).join('\n') + `\nTotal: ₹${totalAmount}`;
+            
+            let msg = `*NEW ORDER*\nUser: ${user.name}\nAddr: ${fullAddr}\nItems:\n` + cart.map(i=>`- ${i.name} (${i.size})`).join('\n') + `\nTotal (with Delivery): ₹${totalAmount}`;
             window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)}`);
             
             cart=[]; document.getElementById('cCount').innerText=0;
