@@ -82,8 +82,12 @@
         
         .info { padding: 10px; }
         .title { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
-        .price { font-weight: 700; font-size: 1rem; color: #333; }
+        .price { font-weight: 700; font-size: 1rem; color: #333; display:flex; align-items:center; flex-wrap:wrap; }
         .btn-view { width: 100%; padding: 6px; background: var(--primary); color: white; border: none; border-radius: 4px; margin-top: 5px; cursor: pointer; font-size: 0.85rem; }
+
+        /* --- NEW STYLES FOR MRP & DISCOUNT --- */
+        .mrp { text-decoration: line-through; color: #888; font-size: 0.8rem; margin-left: 5px; font-weight: 400; }
+        .off { color: #2e7d32; font-size: 0.75rem; font-weight: 700; margin-left: 5px; }
 
         /* MODALS */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; align-items: center; justify-content: center; }
@@ -203,7 +207,7 @@
 
             <div style="padding:0 5px;">
                 <h3 id="pvTitle" style="margin:0 0 5px; font-size:1.1rem; line-height:1.3;"></h3>
-                <div id="pvPrice" style="color:var(--primary); font-weight:bold; font-size:1.2rem;"></div>
+                <div id="pvPrice" style="color:var(--primary); font-weight:bold; font-size:1.2rem; display:flex; align-items:center;"></div>
                 <select id="pvSize" style="width:100%; padding:8px; margin-top:8px; border-radius:6px; border:1px solid #ddd; font-size:0.9rem;"></select>
                 <div id="pvStock" style="font-size:0.8rem; margin-top:5px; font-weight:bold; color:green;"></div>
                 <p id="pvDesc" style="color:#555; font-size:0.85rem; line-height:1.4; margin:8px 0;"></p>
@@ -314,10 +318,9 @@
         let cart = [], wishlist = JSON.parse(localStorage.getItem('jijaWish')) || [];
         let user = JSON.parse(localStorage.getItem('jijaUser'));
         
-        // --- UPDATED GLOBALS ---
         let curProd=null, imgs=[], imgIdx=0;
-        let activeCat = 'all'; // Tracks main category
-        let activeSub = 'all'; // Tracks sub-category
+        let activeCat = 'all'; 
+        let activeSub = 'all'; 
 
         const SIZES = { cloth: ["S","M","L","XL","XXL"], kids: ["0-1Y","2-3Y","4-5Y"], footwear: [6,7,8,9,10], jewelry: ["Free Size"] };
 
@@ -409,15 +412,13 @@
             }
         }
 
-        /* --- UPDATED LOGIC FOR SUB-CATEGORIES --- */
         function setCat(c, b) {
             document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
             if(b) b.classList.add('active');
             
             activeCat = c;
-            activeSub = 'all'; // Reset sub-category
+            activeSub = 'all'; 
 
-            // Show Sub-Category Chips if exist
             const subRow = document.getElementById('subCatRow');
             const subs = appData.subCategories[c];
 
@@ -439,21 +440,15 @@
             applyFilters();
         }
 
-        /* --- UPDATED FILTER LOGIC (BUDGET + SORT + CAT) --- */
         function applyFilters() {
             let list = appData.products || [];
             
-            // 1. Category Filter
             if(activeCat !== 'all') list = list.filter(p => p.cat === activeCat);
-            
-            // 2. Sub-Category Filter
             if(activeSub !== 'all') list = list.filter(p => p.sub === activeSub);
 
-            // 3. Search Filter
             const q = document.getElementById('searchBox').value.toLowerCase();
             if(q) list = list.filter(p => p.name.toLowerCase().includes(q));
 
-            // 4. Budget Filter (FIXED)
             const budget = document.getElementById('budgetFilter').value;
             if(budget !== 'all') {
                 if(budget === '500') list = list.filter(p => parseInt(p.price) < 500);
@@ -461,13 +456,12 @@
                 else if(budget === 'high') list = list.filter(p => parseInt(p.price) > 1000);
             }
 
-            // 5. Sorting
             const sort = document.getElementById('sortSelect').value;
             if(sort === 'low') list.sort((a,b) => parseInt(a.price) - parseInt(b.price));
             else if(sort === 'high') list.sort((a,b) => parseInt(b.price) - parseInt(a.price));
-            else if(sort === 'new') list.sort((a,b) => b.id - a.id); // Assuming ID is incremental
+            else if(sort === 'new') list.sort((a,b) => b.id - a.id);
 
-            // Render
+            // --- UPDATED GRID RENDER WITH MRP & DISCOUNT ---
             document.getElementById('grid').innerHTML = list.length ? list.map(p => {
                 const w = wishlist.includes(p.id) ? 'active' : '';
                 return `<div class="card">
@@ -476,12 +470,19 @@
                         <img src="${p.img}" onclick="openProd(${p.id})">
                         <div class="wish-icon ${w}" onclick="toggleWish(${p.id},this)"><i class="ri-heart-fill"></i></div>
                     </div>
-                    <div class="info"><div class="title">${p.name}</div><div class="price">₹${p.price}</div><button class="btn-view" onclick="openProd(${p.id})">View</button></div>
+                    <div class="info">
+                        <div class="title">${p.name}</div>
+                        <div class="price">
+                            ₹${p.price}
+                            ${p.mrp ? `<span class="mrp">₹${p.mrp}</span>` : ''}
+                            ${p.discount ? `<span class="off">${p.discount}</span>` : ''}
+                        </div>
+                        <button class="btn-view" onclick="openProd(${p.id})">View</button>
+                    </div>
                 </div>`;
             }).join('') : '<div style="width:100%; text-align:center; padding:20px;">No products found</div>';
         }
 
-        // --- SHARE PRODUCT ---
         function shareProduct() {
             const url = window.location.origin + window.location.pathname + '?id=' + curProd.id;
             if (navigator.share) {
@@ -501,7 +502,14 @@
             imgIdx=0; updateGal();
 
             document.getElementById('pvTitle').innerText=curProd.name;
-            document.getElementById('pvPrice').innerText='₹'+curProd.price;
+            
+            // --- UPDATED MODAL PRICE DISPLAY ---
+            document.getElementById('pvPrice').innerHTML = `
+                ₹${curProd.price}
+                ${curProd.mrp ? `<span style="text-decoration:line-through; color:#888; font-size:0.9rem; margin-left:10px;">₹${curProd.mrp}</span>` : ''}
+                ${curProd.discount ? `<span style="color:green; font-size:0.9rem; margin-left:10px; font-weight:bold;">${curProd.discount}</span>` : ''}
+            `;
+            
             document.getElementById('pvDesc').innerText=curProd.desc||"";
             
             const sel = document.getElementById('pvSize');
