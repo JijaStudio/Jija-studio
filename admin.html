@@ -67,6 +67,9 @@
         .thumb { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; }
         .status-select { padding: 5px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; border: 1px solid #ddd; }
 
+        /* BANNER GRID FIX */
+        #bannerGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 10px; }
+
         /* VISIBILITY */
         .section { display: none; animation: fadeIn 0.3s; }
         .section.active { display: block; }
@@ -79,42 +82,24 @@
             
             /* Sidebar becomes Bottom Navigation */
             .sidebar {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: 65px;
-                flex-direction: row;
-                justify-content: space-around;
-                padding: 5px;
-                background: white;
-                border-top: 1px solid #e2e8f0;
-                z-index: 1000;
+                position: fixed; bottom: 0; left: 0; width: 100%; height: 65px;
+                flex-direction: row; justify-content: space-around; padding: 5px;
+                background: white; border-top: 1px solid #e2e8f0; z-index: 1000;
                 box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             }
-            .brand { display: none; } /* Hide Logo in mobile nav */
+            .brand { display: none; }
             
             .nav-item {
-                flex-direction: column;
-                gap: 2px;
-                font-size: 0.7rem;
-                padding: 8px 5px;
-                color: #64748b;
-                margin: 0;
-                border-radius: 0;
+                flex-direction: column; gap: 2px; font-size: 0.7rem; padding: 8px 5px;
+                color: #64748b; margin: 0; border-radius: 0;
             }
             .nav-item:hover { background: none; color: var(--primary); }
             .nav-item.active { background: none; color: var(--primary); box-shadow: none; }
             .nav-item i { font-size: 1.4rem; margin-bottom: 2px; }
             
-            /* Adjust Main Content for Mobile */
-            .main { padding: 15px; margin-bottom: 70px; /* Space for bottom nav */ }
-            
-            /* Adjust Grid for Mobile */
+            .main { padding: 15px; margin-bottom: 70px; }
             .card { padding: 15px; }
             .stk-box input { font-size: 0.9rem; }
-            
-            /* Adjust Tables */
             table { font-size: 0.8rem; }
             th, td { padding: 8px; }
         }
@@ -259,12 +244,13 @@
 
             <div class="card">
                 <div class="card-header">Banners</div>
+                <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">Select a sub-category, paste image URL, then click Add.</p>
                 <div style="display: flex; gap: 10px;">
-                    <select id="banCat" style="width: 100px;"><option value="">Link</option></select>
+                    <select id="banCat" style="width: 120px;"><option value="">Link To...</option></select>
                     <input id="banMedia" placeholder="Img URL" style="flex:1; margin-bottom:0;">
                     <button class="btn btn-primary btn-sm" onclick="addCategoryBanner()">Add</button>
                 </div>
-                <div id="bannerGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap:10px; margin-top:10px;"></div>
+                <div id="bannerGrid"></div>
             </div>
         </div>
 
@@ -315,7 +301,6 @@
     if(sessionStorage.getItem('jijaAdminAuth') === 'true') {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'flex';
-        // loadData is called in window.onload, but we might need to call it here if already loaded
     }
 
     // --- APP LOGIC ---
@@ -383,8 +368,6 @@
     }
 
     // --- PRODUCT LOGIC ---
-    
-    // NEW FUNCTION TO AUTO-CALCULATE DISCOUNT
     function calcDisc() {
         const p = parseFloat(document.getElementById('pPrice').value);
         const m = parseFloat(document.getElementById('pMrp').value);
@@ -425,8 +408,8 @@
             id: editId || Date.now(),
             name, cat: document.getElementById('pCat').value, subCats: currentTags,
             price: document.getElementById('pPrice').value,
-            mrp: document.getElementById('pMrp').value, // SAVING MRP
-            discount: document.getElementById('pDiscount').value, // SAVING DISCOUNT
+            mrp: document.getElementById('pMrp').value,
+            discount: document.getElementById('pDiscount').value,
             img: document.getElementById('pImg').value,
             img2: document.getElementById('pImg2').value,
             img3: document.getElementById('pImg3').value,
@@ -459,11 +442,8 @@
         document.getElementById('pName').value = p.name;
         document.getElementById('pCat').value = p.cat;
         document.getElementById('pPrice').value = p.price;
-        
-        // LOAD MRP AND DISCOUNT
         document.getElementById('pMrp').value = p.mrp || "";
         document.getElementById('pDiscount').value = p.discount || "";
-
         document.getElementById('pImg').value = p.img;
         document.getElementById('pImg2').value = p.img2||"";
         document.getElementById('pImg3').value = p.img3||"";
@@ -490,7 +470,7 @@
         if(confirm("Delete?")) { appData.products = appData.products.filter(p => p.id !== id); saveData(); renderTable(); }
     }
 
-    // --- CATS ---
+    // --- CATS & BANNERS ---
     function renderManageTags() {
         const cat = document.getElementById('manageCat').value;
         const subs = appData.subCategories[cat] || [];
@@ -511,17 +491,53 @@
     function addCategoryBanner() {
         const sub = document.getElementById('banCat').value;
         const media = document.getElementById('banMedia').value;
-        if(sub && media) { appData.catBanners.push({ sub, media }); saveData(); renderBanners(); }
+        if(sub && media) { 
+            appData.catBanners.push({ sub, media }); 
+            saveData(); 
+            renderBanners(); 
+            document.getElementById('banMedia').value = ''; // clear input
+        } else {
+            alert("Please select a Link and enter Image URL");
+        }
     }
+
+    // --- UPDATED RENDER BANNERS FUNCTION ---
     function renderBanners() {
-        document.getElementById('bannerGrid').innerHTML = appData.catBanners.map((b, i) => 
-            `<div style="position:relative; height:60px; border-radius:6px; overflow:hidden;">
-                <img src="${b.media}" style="width:100%; height:100%; object-fit:cover;">
-                <i class="ri-close-circle-fill" style="position:absolute; top:2px; right:2px; color:red; background:white; border-radius:50%; cursor:pointer;" onclick="delBanner(${i})"></i>
-            </div>`
-        ).join('');
+        const grid = document.getElementById('bannerGrid');
+        
+        if(!appData.catBanners || appData.catBanners.length === 0) {
+            grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#999; padding:20px;">No Banners Added</div>';
+            return;
+        }
+
+        grid.innerHTML = appData.catBanners.map((b, i) => `
+            <div style="position:relative; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; background:white; display:flex; flex-direction:column;">
+                <div style="height:90px; overflow:hidden; border-bottom:1px solid #f1f5f9;">
+                    <img src="${b.media}" 
+                         style="width:100%; height:100%; object-fit:cover; cursor:pointer;"
+                         onerror="this.src='https://via.placeholder.com/150?text=Broken+Img'"
+                         onclick="alert('This banner will open: ${b.sub}')">
+                </div>
+                
+                <div style="padding:8px; text-align:center; font-size:0.8rem; font-weight:600; color:#334155; background:#f8fafc;">
+                    Link: <span style="color:var(--primary);">${b.sub}</span>
+                </div>
+
+                <div onclick="delBanner(${i})" 
+                     style="position:absolute; top:5px; right:5px; background:rgba(255,255,255,0.95); border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:red; box-shadow:0 2px 4px rgba(0,0,0,0.2); z-index:10;">
+                    <i class="ri-delete-bin-line" style="font-size:0.9rem;"></i>
+                </div>
+            </div>
+        `).join('');
     }
-    function delBanner(i) { appData.catBanners.splice(i, 1); saveData(); renderBanners(); }
+
+    function delBanner(i) { 
+        if(confirm("Remove this banner?")) {
+            appData.catBanners.splice(i, 1); 
+            saveData(); 
+            renderBanners(); 
+        }
+    }
 
     // --- ORDERS & INV ---
     function renderOrders() {
