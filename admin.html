@@ -196,9 +196,9 @@
                         <option value="jewelry">Jewelry</option>
                         <option value="toy">Toy</option>
                     </select>
-                    <input id="pPrice" type="number" placeholder="Selling Price (₹)">
-                    <input id="pMrp" type="number" placeholder="MRP (₹) (Optional)">
-                    <input id="pDiscount" placeholder="Discount (e.g. 20% OFF)">
+                    <input id="pPrice" type="number" placeholder="Selling Price (₹)" oninput="calcDisc()">
+                    <input id="pMrp" type="number" placeholder="MRP (₹) (Optional)" oninput="calcDisc()">
+                    <input id="pDiscount" placeholder="Discount (Auto)">
                 </div>
 
                 <div style="background:#f8f9fa; padding:10px; border-radius:8px; margin-bottom:10px;">
@@ -383,6 +383,17 @@
     }
 
     // --- PRODUCT LOGIC ---
+    
+    // NEW FUNCTION TO AUTO-CALCULATE DISCOUNT
+    function calcDisc() {
+        const p = parseFloat(document.getElementById('pPrice').value);
+        const m = parseFloat(document.getElementById('pMrp').value);
+        if(p && m && m > p) {
+            const d = Math.round(((m - p) / m) * 100);
+            document.getElementById('pDiscount').value = d + "% OFF";
+        }
+    }
+
     function renderSubSelect() {
         const cat = document.getElementById('pCat').value;
         const subs = appData.subCategories[cat] || [];
