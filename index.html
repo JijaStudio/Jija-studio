@@ -105,16 +105,6 @@
 </head>
 <body>
 
-    <div id="loginModal" class="modal" style="display: flex;">
-        <div class="modal-box" style="text-align: center;">
-            <h2 style="color:var(--primary);">Welcome to Jija Studio</h2>
-            <p style="color:#666; margin-bottom:20px;">Enter details to enter shop</p>
-            <input id="loginName" class="login-input" placeholder="Your Name">
-            <input id="loginPhone" class="login-input" type="tel" placeholder="Mobile Number">
-            <button class="btn-full" onclick="doLogin()">Enter Shop</button>
-        </div>
-    </div>
-
     <header>
         <div class="logo">
             <img src="logo.jpg" onerror="this.src='https://via.placeholder.com/50?text=Logo'">
@@ -213,6 +203,9 @@
     <div id="checkoutModal" class="modal">
         <div class="modal-box">
             <h3>Shipping Details</h3>
+            <input id="checkoutName" placeholder="Full Name" class="login-input">
+            <input id="checkoutPhone" placeholder="Mobile Number" type="tel" class="login-input">
+            
             <input value="India 🇮🇳" disabled class="login-input">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <input id="addrState" placeholder="State" class="login-input">
@@ -282,7 +275,7 @@
         let activeSub = 'all'; 
 
         window.onload = async () => {
-            if(user) document.getElementById('loginModal').style.display='none';
+            // Login Modal check removed
             const r = await fetch(DB_URL);
             const d = await r.json();
             if(d) {
@@ -305,16 +298,6 @@
                 }
             }
         };
-
-        function doLogin() {
-            const n = document.getElementById('loginName').value;
-            const p = document.getElementById('loginPhone').value;
-            if(n && p) {
-                user = {name:n, phone:p};
-                localStorage.setItem('jijaUser', JSON.stringify(user));
-                document.getElementById('loginModal').style.display='none';
-            } else alert("Enter details");
-        }
 
         function applyTheme(t) {
             let r = document.documentElement.style;
@@ -341,7 +324,6 @@
         }
 
         function renderHome() {
-            // When a banner is clicked, we filter by that sub-category
             document.getElementById('catBanners').innerHTML = appData.catBanners.map(b => {
                 return `<div class="cat-card" onclick="bannerFilter('${b.sub}')"><img src="${b.media}" class="cat-media"><div class="cat-overlay">${b.sub}</div></div>`;
             }).join('');
@@ -349,14 +331,12 @@
         }
 
         function bannerFilter(sub) {
-            activeCat = 'all'; // Reset main cat to search all
-            activeSub = sub;   // Set sub-category
-            // Visual Update: Highlight 'All' tab and reset sub chips
+            activeCat = 'all'; 
+            activeSub = sub;   
             document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
             document.querySelectorAll('.tab-btn')[0].classList.add('active');
-            document.getElementById('subCatRow').style.display = 'none'; // Hide specific sub-row as we are in 'All' mode technically
+            document.getElementById('subCatRow').style.display = 'none'; 
             applyFilters();
-            // Scroll to grid to show results
             document.getElementById('grid').scrollIntoView({behavior: 'smooth'});
         }
 
@@ -487,9 +467,11 @@
 
         async function addReview() {
             const txt = document.getElementById('revText').value;
+            // Use user name if available, otherwise Guest
+            const uName = user ? user.name : "Guest";
             if(txt) {
                 if(!appData.reviews) appData.reviews=[];
-                appData.reviews.push({pid:curProd.id, user:user.name, text:txt});
+                appData.reviews.push({pid:curProd.id, user:uName, text:txt});
                 await fetch(DB_URL,{method:'PUT',body:JSON.stringify(appData)});
                 document.getElementById('revText').value="";
                 openProd(curProd.id); 
@@ -547,25 +529,43 @@
         }
         
         function openCheckout() {
+            // Pre-fill Name/Phone if user exists
+            if(user) {
+                document.getElementById('checkoutName').value = user.name;
+                document.getElementById('checkoutPhone').value = user.phone;
+            }
             document.getElementById('cartModal').style.display='none';
             document.getElementById('checkoutModal').style.display='flex';
         }
 
         async function placeOrder() {
+            // Capturing Name and Phone from Checkout Form
+            const uName = document.getElementById('checkoutName').value;
+            const uPhone = document.getElementById('checkoutPhone').value;
             const addr = document.getElementById('addrLocal').value;
-            if(!addr) return alert("Enter Address");
+
+            if(!uName || !uPhone || !addr) return alert("Please enter Name, Mobile Number and Address");
+            
+            // Save/Update user globally and in local storage
+            user = { name: uName, phone: uPhone };
+            localStorage.setItem('jijaUser', JSON.stringify(user));
+
             const fullAddr = `${addr}, ${document.getElementById('addrCity').value}, ${document.getElementById('addrDist').value}`;
             const totalAmount = document.getElementById('cartTotal').innerText;
+            
             const order = { date: new Date().toISOString(), user: user, address: {city:fullAddr}, cart:cart, total:totalAmount, status: "Ordered" };
             await fetch(ORDERS_URL, { method: "POST", body: JSON.stringify(order) });
-            let msg = `*NEW ORDER*\nUser: ${user.name}\nAddr: ${fullAddr}\nItems:\n` + cart.map(i=>`- ${i.name} (${i.size})`).join('\n') + `\nTotal with Delivery: ₹${totalAmount}`;
+            
+            let msg = `*NEW ORDER*\nName: ${uName}\nMobile: ${uPhone}\nAddr: ${fullAddr}\nItems:\n` + cart.map(i=>`- ${i.name} (${i.size})`).join('\n') + `\nTotal with Delivery: ₹${totalAmount}`;
             window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)}`);
+            
             cart=[]; document.getElementById('cCount').innerText=0;
             document.getElementById('checkoutModal').style.display='none';
             alert("Order Placed!");
         }
 
         async function openOrders() {
+            if(!user) return alert("Please make an order first to identify yourself.");
             const r = await fetch(ORDERS_URL);
             const d = await r.json();
             const list = document.getElementById('myOrdersList');
